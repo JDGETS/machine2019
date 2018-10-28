@@ -1,0 +1,65 @@
+{
+  "1": {
+    "pose": [0, 40, 150, 0, 0, 0],
+    "function": "",
+    "grippers": {
+      "right": false,
+      "left": false,
+      "torque":false
+    }
+  },
+  "2": {
+    "pose": [80, 60, 150, 0, 0, 0],
+    "function": "",
+    "grippers": {
+      "right": false,
+      "left": false,
+      "torque":false
+    }
+  },
+  "3": {
+    "pose": [160, 15, 150, 0, 0, 0],
+    "function": "",
+    "grippers": {
+      "right": false,
+      "left": false,
+      "torque":false
+    }
+  },
+  "4": {
+    "pose": [200, 15, 120, 0, 0, 0],
+    "function": "",
+    "grippers": {
+      "right": false,
+      "left": false,
+      "torque":false
+    }
+  },
+  "5": {
+    "pose": [200, 15, 80, 0, 0, 0],
+    "function": "",
+    "grippers": {
+      "right": false,
+      "left": false,
+      "torque":false
+    }
+  },
+  "6": {
+    "pose": [200, 15, 40, 0, 0, 0],
+    "function": "",
+    "grippers": {
+      "right": false,
+      "left": true,
+      "torque":false
+    }
+  },
+  "7": {
+    "pose": [200, 15, 120, 0, 0, 0],
+    "function": "",
+    "grippers": {
+      "right": false,
+      "left": true,
+      "torque":false
+    }
+  }
+}
