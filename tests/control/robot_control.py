@@ -1,6 +1,6 @@
-import Adafruit_PCA9685
 import pigpio
 import math
+import rpyc
 
 # Rpi names
 rpi_green = "rPiGreen"
@@ -8,6 +8,9 @@ rpi_green_addr = "10.16.50.140"
 rpi_pink = "raspberry-rose"
 rpi_blue = "rPiBlue"
 rpi_blue_addr = "10.0.0.2"
+
+# Rpc connection
+RPC_PORT = 31000
 
 # Controller constants
 max_controller_value = 32767.0
@@ -31,7 +34,8 @@ MOTOR_FR_CHANNEL = 2
 MOTOR_BR_CHANNEL = 3
 
 # Choosing the robot to control
-MINI_ROBOT = True
+PUPPER = 'pupper'
+DOGGO = 'doggo'
 
 # Control modes
 forward = 0
@@ -40,8 +44,54 @@ backwards = 1
 
 class MotionController:
     def __init__(self):
-        self.pwm_controller = PWMController()
+        self.pwm_controller = PWMController(rpi_green_addr)
         self.acceleration_value = 0.1
+        self.rpc_connection = rpyc.connect(rpi_green_addr, RPC_PORT)
+
+    def control_handle(self, controller_state, robot):
+        # Mode de contrôle manuel du bras
+        if controller_state['leftTrigger'] == 1 and robot == DOGGO:
+            self.doggo_arm_control(controller_state)
+
+        # Controle manuel de la propulsion
+        if controller_state['rightTrigger'] == 1 and robot == DOGGO:
+            self.doggo_motion_control(controller_state)
+
+        if controller_state['rightTrigger'] == 1 and robot == PUPPER:
+            self.pupper_motion_control(controller_state)
+
+        # Arrêt de la propulsion
+        if controller_state['rightTrigger'] == 0:
+            self.pwm_controller.stop_all_motors()
+
+    def doggo_arm_control(self, controller_state):
+        IGNORE_TRESHOLD = 3000
+        # Get x motion
+        if controller_state['leftJoyX'] > IGNORE_TRESHOLD:
+            x_s = max(min(controller_state['leftJoyX'] / 32767.0, 1.), 0.0)
+        elif controller_state['leftJoyX'] < -IGNORE_TRESHOLD:
+            x_s = -max(min(abs(controller_state['leftJoyX'] / 32767.0), 1.), 0.0)
+        else:
+            x_s = 0.0
+        # Get y motion
+        if controller_state['leftJoyY'] > IGNORE_TRESHOLD:
+            y_s = max(min(controller_state['leftJoyY'] / 32767.0, 1.), 0.0)
+        elif controller_state['leftJoyY'] < -IGNORE_TRESHOLD:
+            y_s = -max(min(abs(controller_state['leftJoyY'] / 32767.0), 1.), 0.0)
+        else:
+            y_s = 0.0
+        # Get z motion
+        if controller_state['rightJoyY'] > IGNORE_TRESHOLD:
+            z_s = max(min(controller_state['rightJoyY'] / 32767.0, 1.), 0.0)
+        elif controller_state['rightJoyY'] < -IGNORE_TRESHOLD:
+            z_s = -max(min(abs(controller_state['rightJoyY'] / 32767.0), 1.), 0.0)
+        else:
+            z_s = 0.0
+
+        # Client RPC to remote ArmModule
+        # Todo : implement server side
+        pose = {'pose': [-x_s, y_s, -z_s, 0, 0, 0]}
+        self.rpc_connection.root.manual_move(pose)
 
     # Même code que l'an passé - méthode tracks_ctrl() dans ControlModule
     def doggo_motion_control(self, controller_state):
@@ -160,14 +210,21 @@ class MotionController:
 
 
 class PWMController:
-    def __init__(self):
-        self.rpi = pigpio.pi(rpi_green_addr)
+    def __init__(self, rpi_address):
+        self.rpi = pigpio.pi(rpi_address)
 
+    # Test pruposes
     def test(self):
         # self.rpi.set_mode(6, pigpio.OUTPUT)
         self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_FOR_CHANNEL, 0)
         self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_BACK_CHANNEL, 0)
         self.rpi.set_PWM_dutycycle(MOTOR_LEFT_FOR_CHANNEL, 0)
+        self.rpi.set_PWM_dutycycle(MOTOR_LEFT_BACK_CHANNEL, 0)
+
+    def stop_all_motors(self):
+        self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_FOR_CHANNEL, 0)
+        self.rpi.set_PWM_dutycycle(MOTOR_LEFT_FOR_CHANNEL, 0)
+        self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_BACK_CHANNEL, 0)
         self.rpi.set_PWM_dutycycle(MOTOR_LEFT_BACK_CHANNEL, 0)
 
     # PWM control (remote gpio) for the Puppers
@@ -224,5 +281,5 @@ class PWMController:
 
 # For testing purposes
 if __name__ == "__main__":
-    controller = PWMController()
+    controller = PWMController(rpi_green_addr)
     controller.test()

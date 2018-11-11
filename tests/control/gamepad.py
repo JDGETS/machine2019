@@ -1,6 +1,7 @@
 from inputs import get_gamepad
-from tests.control.motion_control import MotionController
+from robot_control import MotionController
 import inputs
+import sys
 
 pressed = 1
 released = 0
@@ -22,7 +23,7 @@ class DictManette(object):
         self.lt = 0
         self.start = 0
         self.back = 0
-        self.padVertical  = 0
+        self.padVertical = 0
         self.padHorizontal = 0
         self.rightJoyX = 0
         self.rightJoyY = 0
@@ -59,11 +60,15 @@ class DictManette(object):
 
 
 class RemoteController:
-    def __init__(self):
+    def __init__(self, robot_to_control):
         self.first_pass = True
         self.arm_control_mode = False
         self.machine_control_mode = False
         self.motion_controller = MotionController()
+        self.robot = robot_to_control
+
+    def send_state(self, state):
+        self.motion_controller.control_handle(state, self.robot)
 
     def loop(self):
 
@@ -84,7 +89,7 @@ class RemoteController:
                     if event.code == "BTN_SOUTH":
                         manette.a = event.state
 
-                        self.motion_controller.motion_control(manette)
+                        self.send_state(manette)
 
                         # if event.state == pressed:
                         #     print "A pressed"
@@ -100,7 +105,7 @@ class RemoteController:
 
                     elif event.code == "BTN_NORTH":
                         manette.x = event.state
-                        self.motion_controller.motion_control(manette)
+                        self.send_state(manette)
 
                         # if event.state == pressed:
                         #     print "X pressed"
@@ -115,7 +120,7 @@ class RemoteController:
 
                     elif event.code == "BTN_EAST":
                         manette.b = event.state
-                        self.motion_controller.motion_control(manette)
+                        self.send_state(manette)
 
                         # if event.state == pressed:
                         #     print "B pressed"
@@ -130,7 +135,7 @@ class RemoteController:
 
                     elif event.code == "BTN_WEST":
                         manette.y = event.state
-                        self.motion_controller.motion_control(manette)
+                        self.send_state(manette)
 
                         # if event.state == pressed:
                         #     print "Y pressed"
@@ -145,12 +150,12 @@ class RemoteController:
 
                     elif event.code == "BTN_MODE" and event.state == pressed:
                         manette.centralButton = pressed
-                        self.motion_controller.motion_control(manette)
+                        self.send_state(manette)
                         # self.send_message(Localhost, VizualizationModuleConstants, {'xbox_key': 'central_pressed'})
 
                     elif event.code == "BTN_TR":
                         manette.rb = event.state
-                        self.motion_controller.motion_control(manette)
+                        self.send_state(manette)
 
                         # if event.state == pressed:
                         #     manette.rb = event.state
@@ -163,7 +168,7 @@ class RemoteController:
 
                     elif event.code == "BTN_TL":
                         manette.lb = event.state
-                        self.motion_controller.motion_control(manette)
+                        self.send_state(manette)
 
 
                         # if event.state == pressed:
@@ -181,7 +186,7 @@ class RemoteController:
 
                     if event.code == "ABS_Y":     # left joystick Y
                         manette.leftJoyY = -event.state
-                        self.motion_controller.motion_control(manette)
+                        self.send_state(manette)
 
                     # elif event.code == "ABS_RY":    # right joystick Y
                     #     manette.rightJoyY = event.state
@@ -189,7 +194,7 @@ class RemoteController:
 
                     elif event.code == "ABS_RX":    # right joystick X
                         manette.rightJoyX = event.state
-                        self.motion_controller.motion_control(manette)
+                        self.send_state(manette)
 
                     elif event.code == "ABS_Z":  # Left trigger
                         #manette.leftTrigger = event.state
@@ -200,7 +205,7 @@ class RemoteController:
                             self.arm_control_mode = True
                             manette.leftTrigger = 1
 
-                            self.motion_controller.motion_control(manette)
+                            self.send_state(manette)
 
                             # Utilisé pour la visualisation des commandes effectuées
                             # self.send_message(Localhost, VizualizationModuleConstants,
@@ -210,7 +215,7 @@ class RemoteController:
                             self.arm_control_mode = False
                             manette.leftTrigger = 0
 
-                            self.motion_controller.motion_control(manette)
+                            self.send_state(manette)
 
                             # Utilisé pour la visualisation des commandes effectuées
                             # self.send_message(Localhost, VizualizationModuleConstants,
@@ -224,7 +229,7 @@ class RemoteController:
                         if event.state == 255:
                             self.machine_control_mode = True
                             manette.rightTrigger = 1
-                            self.motion_controller.motion_control(manette)
+                            self.send_state(manette)
 
 
                             # self.send_message(Localhost, VizualizationModuleConstants, {'xbox_key': 'RT_pressed'})
@@ -232,7 +237,7 @@ class RemoteController:
                         if event.state == 0:
                             self.machine_control_mode = False
                             manette.rightTrigger = 0
-                            self.motion_controller.motion_control(manette)
+                            self.send_state(manette)
 
 
                             # self.send_message(Localhost, VizualizationModuleConstants, {'xbox_key': 'RT_released'})
@@ -240,7 +245,7 @@ class RemoteController:
                     if event.code == "ABS_HAT0X":  # pad right et left
 
                         manette.padHorizontal = event.state
-                        self.motion_controller.motion_control(manette)
+                        self.send_state(manette)
 
                         # Pour la visualisation
 
@@ -255,7 +260,7 @@ class RemoteController:
 
                     if event.code == "ABS_HAT0Y":  # pad up and down
                         manette.padVertical = event.state
-                        self.motion_controller.motion_control(manette)
+                        self.send_state(manette)
 
                         # Pour la visualisation
 
@@ -273,7 +278,7 @@ class RemoteController:
 
 
 def main():
-    controller_module = RemoteController()
+    controller_module = RemoteController(sys.argv[1])
     controller_module.loop()
 
 

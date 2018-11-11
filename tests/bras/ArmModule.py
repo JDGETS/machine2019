@@ -34,7 +34,7 @@ class ArmState(object):
             yield('labelIr', self.labelIr)
 
         except Exception as e:
-            print e
+            print(e)
 
 
 class ArmModule(MachineModule):
