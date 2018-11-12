@@ -8,6 +8,7 @@ rpi_green_addr = "10.16.50.140"
 rpi_pink = "raspberry-rose"
 rpi_blue = "rPiBlue"
 rpi_blue_addr = "10.0.0.2"
+rpi_doggo_addr = "10.16.50.140"
 
 # Rpc connection
 RPC_PORT = 31000
@@ -44,72 +45,72 @@ backwards = 1
 
 class MotionController:
     def __init__(self):
-        self.pwm_controller = PWMController(rpi_green_addr)
+        self.pwm_controller = PWMController(rpi_doggo_addr)
         self.acceleration_value = 0.1
-        self.rpc_connection = rpyc.connect(rpi_green_addr, RPC_PORT)
+        # self.rpc_connection = rpyc.connect(rpi_green_addr, RPC_PORT)
 
     def control_handle(self, controller_state, robot):
         # Mode de contrôle manuel du bras
-        if controller_state['leftTrigger'] == 1 and robot == DOGGO:
+        if controller_state.leftTrigger == 1 and robot == DOGGO:
             self.doggo_arm_control(controller_state)
 
         # Controle manuel de la propulsion
-        if controller_state['rightTrigger'] == 1 and robot == DOGGO:
+        if controller_state.rightTrigger == 1 and robot == DOGGO:
             self.doggo_motion_control(controller_state)
 
-        if controller_state['rightTrigger'] == 1 and robot == PUPPER:
+        if controller_state.rightTrigger == 1 and robot == PUPPER:
             self.pupper_motion_control(controller_state)
 
         # Arrêt de la propulsion
-        if controller_state['rightTrigger'] == 0:
+        if controller_state.rightTrigger == 0:
             self.pwm_controller.stop_all_motors()
 
     def doggo_arm_control(self, controller_state):
         IGNORE_TRESHOLD = 3000
         # Get x motion
-        if controller_state['leftJoyX'] > IGNORE_TRESHOLD:
-            x_s = max(min(controller_state['leftJoyX'] / 32767.0, 1.), 0.0)
-        elif controller_state['leftJoyX'] < -IGNORE_TRESHOLD:
-            x_s = -max(min(abs(controller_state['leftJoyX'] / 32767.0), 1.), 0.0)
+        if controller_state.leftJoyX > IGNORE_TRESHOLD:
+            x_s = max(min(controller_state.leftJoyX / 32767.0, 1.), 0.0)
+        elif controller_state.leftJoyX < -IGNORE_TRESHOLD:
+            x_s = -max(min(abs(controller_state.leftJoyX / 32767.0), 1.), 0.0)
         else:
             x_s = 0.0
         # Get y motion
-        if controller_state['leftJoyY'] > IGNORE_TRESHOLD:
-            y_s = max(min(controller_state['leftJoyY'] / 32767.0, 1.), 0.0)
-        elif controller_state['leftJoyY'] < -IGNORE_TRESHOLD:
-            y_s = -max(min(abs(controller_state['leftJoyY'] / 32767.0), 1.), 0.0)
+        if controller_state.leftJoyY > IGNORE_TRESHOLD:
+            y_s = max(min(controller_state.leftJoyY / 32767.0, 1.), 0.0)
+        elif controller_state.leftJoyY < -IGNORE_TRESHOLD:
+            y_s = -max(min(abs(controller_state.leftJoyY / 32767.0), 1.), 0.0)
         else:
             y_s = 0.0
         # Get z motion
-        if controller_state['rightJoyY'] > IGNORE_TRESHOLD:
-            z_s = max(min(controller_state['rightJoyY'] / 32767.0, 1.), 0.0)
-        elif controller_state['rightJoyY'] < -IGNORE_TRESHOLD:
-            z_s = -max(min(abs(controller_state['rightJoyY'] / 32767.0), 1.), 0.0)
+        if controller_state.rightJoyY > IGNORE_TRESHOLD:
+            z_s = max(min(controller_state.rightJoyY / 32767.0, 1.), 0.0)
+        elif controller_state.rightJoyY < -IGNORE_TRESHOLD:
+            z_s = -max(min(abs(controller_state.rightJoyY / 32767.0), 1.), 0.0)
         else:
             z_s = 0.0
 
         # Client RPC to remote ArmModule
         # Todo : implement server side
         pose = {'pose': [-x_s, y_s, -z_s, 0, 0, 0]}
-        self.rpc_connection.root.manual_move(pose)
+        # self.rpc_connection.root.manual_move(pose)
 
     # Même code que l'an passé - méthode tracks_ctrl() dans ControlModule
     def doggo_motion_control(self, controller_state):
         # Get y motion
-        if controller_state['leftJoyY'] > 3000 or controller_state['leftJoyY'] < -3000:
-            right = left = controller_state['leftJoyY'] / 32767.0
+        if controller_state.leftJoyY > 3000 or controller_state.leftJoyY < -3000:
+            right = left = controller_state.leftJoyY / 32767.0
 
         else:
             right = left = 0
 
         # Get z motion
-        if controller_state['rightJoyX'] > 5000:
-            left = controller_state['rightJoyX'] / 32767.0
-            right = -controller_state['rightJoyX'] / 32767.0
+        if controller_state.rightJoyX > 5000:
+            left = controller_state.rightJoyX / 32767.0
+            right = -controller_state.rightJoyX / 32767.0
 
-        elif controller_state['rightJoyX'] < -5000:
-            left = controller_state['rightJoyX'] / 32767.0
-            right = -controller_state['rightJoyX'] / 32767.0
+        elif controller_state.rightJoyX < -5000:
+            left = controller_state.rightJoyX / 32767.0
+            right = -controller_state.rightJoyX / 32767.0
 
         if right > 0:
             forward_right = min(abs(right + 0.5), 0.99)
@@ -195,7 +196,7 @@ class MotionController:
                       'backward_right_pwm': backward_right, 'backward_left_pwm': backward_left}
 
         print(tracks_msg)
-        # self.pwm_controller.mini_robot_motion_motors(tracks_msg)
+        self.pwm_controller.pupper_pwm_motors(tracks_msg)
 
     def acceleration_function(self, value):
         # TODO : arranger et implementer rampe acceleration

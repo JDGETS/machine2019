@@ -201,7 +201,6 @@ class RemoteController:
                         #self.send_message(list(LOCAL_HOST), ControlModuleConstants, {'xbox_ctrlr': dict(manette)})
 
                         if event.state == 255:
-                            print("left trigger pressed")
                             self.arm_control_mode = True
                             manette.leftTrigger = 1
 
