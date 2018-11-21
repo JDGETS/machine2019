@@ -1,0 +1,12 @@
+service camera
+{
+  type = UNLISTED
+  socket_type = stream
+  protocol = tcp
+  wait = no
+  server = /usr/bin/raspivid
+  server_args = -w 683 -h 384 -md 4 -t 0 -b 10000000 -o -
+  port = 9999
+  user = root
+  instances = 1
+}
