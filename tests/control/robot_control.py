@@ -91,10 +91,9 @@ class MotionController:
             z_s = 0.0
 
         # Client RPC to remote ArmModule
-        # Todo : implement server side
         pose = {'x': -x_s, 'y': y_s, 'z': -z_s}
         print pose
-        # self.rpc_connection.root.manual_move(pose)
+        # self.rpc_connection.root.move_to_pose(pose)
 
     # Même code que l'an passé - méthode tracks_ctrl() dans ControlModule
     def doggo_motion_control(self, controller_state):

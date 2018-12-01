@@ -11,15 +11,18 @@ def ik(x, y, z, r):
     # angle of the base
     t0 = math.atan2(y, x)
 
-    A1 = math.atan2(z - L1z, x - L1z)
-    d = math.sqrt((x - L1x) ** 2 + (z - L1z) ** 2)
+    d = math.sqrt((x - L1x * math.cos(t0)) ** 2 + (z - L1z) ** 2 + (y - L1x * math.sin(t0)) ** 2)
+    dx = math.sqrt(d**2 - (z - L1z)**2)
+
+    A1 = math.atan2(z - L1z, dx)
+
     A2 = coslaw(d, L2, L3)
 
     t1 = A1 + A2
 
     t2 = coslaw(L2, L3, d)
 
-    t3 = t1 + t2 + -r - math.pi # + maybe offset?
+    t3 = t1 + t2 + - r - math.pi # + maybe offset?
 
     return [t0, t1, t2, t3]
 
