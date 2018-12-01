@@ -1,3 +1,4 @@
+# coding=utf-8
 from inputs import get_gamepad
 from robot_control import MotionController
 import inputs
@@ -180,17 +181,17 @@ class RemoteController:
 
                 elif event.ev_type == "Absolute":  # Triggers, pad et joysticks
 
-                    # if event.code == "ABS_X":   # left joystick X
-                    #     manette.leftJoyX = event.state
-                    #     self.motion_controller.motion_control(manette)
+                    if event.code == "ABS_X":   # left joystick X
+                        manette.leftJoyX = event.state
+                        self.send_state(manette)
 
                     if event.code == "ABS_Y":     # left joystick Y
                         manette.leftJoyY = -event.state
                         self.send_state(manette)
 
-                    # elif event.code == "ABS_RY":    # right joystick Y
-                    #     manette.rightJoyY = event.state
-                    #     self.motion_controller.motion_control(manette)
+                    elif event.code == "ABS_RY":    # right joystick Y
+                        manette.rightJoyY = event.state
+                        self.send_state(manette)
 
                     elif event.code == "ABS_RX":    # right joystick X
                         manette.rightJoyX = event.state

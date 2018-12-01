@@ -1,14 +1,15 @@
+# coding=utf-8
 import pigpio
 import math
 import rpyc
 
 # Rpi names
-rpi_green = "rPiGreen"
+rpi_green = "raspberrypi-1"
 rpi_green_addr = "10.16.50.140"
 rpi_pink = "raspberry-rose"
 rpi_blue = "rPiBlue"
 rpi_blue_addr = "10.0.0.2"
-rpi_doggo_addr = "10.16.50.140"
+rpi_doggo_hostname = "raspberrypi-1"
 
 # Rpc connection
 RPC_PORT = 31000
@@ -19,14 +20,14 @@ x_ignore_treshold = 3000
 y_ignore_treshold = 3000
 
 # PWM Range
-pwm_range = 255
+pwm_range = 170
 pwm_half_range = 127
 
 # PWM channels
-MOTOR_RIGHT_FOR_CHANNEL = 22
-MOTOR_LEFT_FOR_CHANNEL = 17
-MOTOR_RIGHT_BACK_CHANNEL = 10
-MOTOR_LEFT_BACK_CHANNEL = 27
+MOTOR_RIGHT_FOR_CHANNEL = 27
+MOTOR_LEFT_FOR_CHANNEL = 26
+MOTOR_RIGHT_BACK_CHANNEL = 22
+MOTOR_LEFT_BACK_CHANNEL = 17
 MOTOR_FREQ_HZ = 100
 
 MOTOR_FL_CHANNEL = 0
@@ -45,8 +46,8 @@ backwards = 1
 
 class MotionController:
     def __init__(self):
-        self.pwm_controller = PWMController(rpi_doggo_addr)
         self.acceleration_value = 0.1
+        self.pwm_controller = PWMController(rpi_doggo_hostname)
         # self.rpc_connection = rpyc.connect(rpi_green_addr, RPC_PORT)
 
     def control_handle(self, controller_state, robot):
@@ -62,8 +63,8 @@ class MotionController:
             self.pupper_motion_control(controller_state)
 
         # Arrêt de la propulsion
-        if controller_state.rightTrigger == 0:
-            self.pwm_controller.stop_all_motors()
+        # if controller_state.rightTrigger == 0:
+        #     self.pwm_controller.stop_all_motors()
 
     def doggo_arm_control(self, controller_state):
         IGNORE_TRESHOLD = 3000
@@ -91,7 +92,8 @@ class MotionController:
 
         # Client RPC to remote ArmModule
         # Todo : implement server side
-        pose = {'pose': [-x_s, y_s, -z_s, 0, 0, 0]}
+        pose = {'x': -x_s, 'y': y_s, 'z': -z_s}
+        print pose
         # self.rpc_connection.root.manual_move(pose)
 
     # Même code que l'an passé - méthode tracks_ctrl() dans ControlModule
@@ -151,8 +153,8 @@ class MotionController:
             tracks_msg = {'forward_right_pwm': 0, 'forward_left_pwm': 0, 'backward_right_pwm': 0,
                           'backward_left_pwm': 0}
 
-        # print(tracks_msg)
-        self.pwm_controller.doggo_pwm_motors(tracks_msg)
+        print(tracks_msg)
+        # self.pwm_controller.doggo_pwm_motors(tracks_msg)
 
     # Code quelque peu différent que celui de l'année passée et refactored, mais fait la même chose pour le moment
     def pupper_motion_control(self, controller_state):
@@ -173,21 +175,21 @@ class MotionController:
             right = -pwm_range * controller_state.rightJoyX / max_controller_value
 
         if right > 0:
-            forward_right = self.acceleration_function(int(abs(right)))
+            forward_right = int(abs(right))
             backward_right = 0
         elif right < 0:
             forward_right = 0
-            backward_right = self.acceleration_function(int(abs(right)))
+            backward_right = int(abs(right))
         else:
             backward_right = 0
             forward_right = 0
 
         if left > 0:
-            forward_left = self.acceleration_function(int(abs(left)))
+            forward_left = int(abs(left))
             backward_left = 0
         elif left < 0:
             forward_left = 0
-            backward_left = self.acceleration_function((abs(left)))
+            backward_left = int(abs(left))
         else:
             backward_left = 0
             forward_left = 0
@@ -195,8 +197,24 @@ class MotionController:
         tracks_msg = {'forward_right_pwm': forward_right, 'forward_left_pwm': forward_left,
                       'backward_right_pwm': backward_right, 'backward_left_pwm': backward_left}
 
+        if backward_right < 2:
+            del tracks_msg['backward_right_pwm']
+
+        if backward_left < 2:
+            del tracks_msg['backward_left_pwm']
+
+        if forward_left < 2:
+            del tracks_msg['forward_left_pwm']
+
+        if forward_right < 2:
+            del tracks_msg['forward_right_pwm']
+
+        if bool(tracks_msg) is False:
+            tracks_msg = {'forward_right_pwm': 0, 'forward_left_pwm': 0, 'backward_right_pwm': 0,
+                          'backward_left_pwm': 0}
+
         print(tracks_msg)
-        self.pwm_controller.pupper_pwm_motors(tracks_msg)
+        self.pwm_controller.doggo_pwm_motors(tracks_msg)
 
     def acceleration_function(self, value):
         # TODO : arranger et implementer rampe acceleration
@@ -249,35 +267,35 @@ class PWMController:
             if 'forward_left_pwm' in msg and 'backward_left_pwm' in msg:
                 if msg['forward_left_pwm'] > msg['backward_left_pwm']:
                     self.rpi.set_PWM_dutycycle(MOTOR_LEFT_BACK_CHANNEL, 0)
-                    self.rpi.set_PWM_dutycycle(MOTOR_LEFT_FOR_CHANNEL, int((1.0 - msg['forward_left_pwm']) * 255))
+                    self.rpi.set_PWM_dutycycle(MOTOR_LEFT_FOR_CHANNEL, msg['forward_left_pwm'])
                 else:
                     self.rpi.set_PWM_dutycycle(MOTOR_LEFT_FOR_CHANNEL, 0)
-                    self.rpi.set_PWM_dutycycle(MOTOR_LEFT_BACK_CHANNEL, int((1.0 - msg['backward_left_pwm']) * 255))
+                    self.rpi.set_PWM_dutycycle(MOTOR_LEFT_BACK_CHANNEL, msg['backward_left_pwm'])
 
             elif 'forward_left_pwm' in msg:
                 self.rpi.set_PWM_dutycycle(MOTOR_LEFT_BACK_CHANNEL, 0)
-                self.rpi.set_PWM_dutycycle(MOTOR_LEFT_FOR_CHANNEL, int((1.0 - msg['forward_left_pwm']) * 255))
+                self.rpi.set_PWM_dutycycle(MOTOR_LEFT_FOR_CHANNEL, msg['forward_left_pwm'])
 
             elif 'backward_left_pwm' in msg:
                 self.rpi.set_PWM_dutycycle(MOTOR_LEFT_FOR_CHANNEL, 0)
-                self.rpi.set_PWM_dutycycle(MOTOR_LEFT_BACK_CHANNEL, int((1.0 - msg['backward_left_pwm']) * 255))
+                self.rpi.set_PWM_dutycycle(MOTOR_LEFT_BACK_CHANNEL, msg['backward_left_pwm'])
 
             if 'forward_right_pwm' in msg and 'backward_right_pwm' in msg:
                 if msg['forward_right_pwm'] > msg['backward_right_pwm']:
                     self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_BACK_CHANNEL, 0)
-                    self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_FOR_CHANNEL, int((1.0 - msg['forward_right_pwm']) * 255))
+                    self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_FOR_CHANNEL, msg['forward_right_pwm'])
 
                 else:
                     self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_FOR_CHANNEL, 0)
-                    self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_BACK_CHANNEL, int((1.0 - msg['backward_right_pwm']) * 255))
+                    self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_BACK_CHANNEL, msg['backward_right_pwm'])
 
             elif 'forward_right_pwm' in msg:
                 self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_BACK_CHANNEL, 0)
-                self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_FOR_CHANNEL, int((1.0 - msg['forward_right_pwm']) * 255))
+                self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_FOR_CHANNEL, msg['forward_right_pwm'])
 
             elif 'backward_right_pwm' in msg:
                 self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_FOR_CHANNEL, 0)
-                self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_BACK_CHANNEL, int((1.0 - msg['backward_right_pwm']) * 255))
+                self.rpi.set_PWM_dutycycle(MOTOR_RIGHT_BACK_CHANNEL, msg['backward_right_pwm'])
 
 
 # For testing purposes
