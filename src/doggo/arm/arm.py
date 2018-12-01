@@ -33,27 +33,34 @@ class Arm:
         self.opened = False
         self.dyn_chain.close()
 
-    def goto(self, x, y, z, r):
+    def goto(self, x, y, z, r, speed=50):
+        '''
+        Uses inverse kinematic to go to a position in space
+
+        '''
         self.goal = Point(x, y, z, r)
 
         joints = ik(*self.goal)
         joints = map(math.degrees, joints)
         goals = self.angles_to_motors(*joints)
 
-        return self.write_goal(*goals)
-
-    def write_23(self, pos, pos4, pos5, speed=100):
-        self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [pos, 1023 - pos, pos4, pos5], [speed]*4)
+        return self.write_goal(*goals, speed=speed)
 
     def write_goal(self, goal1, goal23, goal4, goal5, speed=50):
         '''
         Write goal positions of all servos with given speed
         '''
-        self.dyn_chain.sync_write_pos_speed([1, 2, 3, 4, 5], [goal1, goal23, 1023 - goal23, goal4, goal5], [speed]*4)
+        self.dyn_chain.sync_write_pos_speed([1, 2, 3, 4, 5], [goal1, goal23, 1023 - goal23, goal4, goal5], [speed]*5)
+
+    def disable_all(self):
+        '''
+        Disable torque of all motors
+        '''
+        self.dyn_chain.disable()
 
     def angles_to_motors(self, a1, a23, a4, a5):
         '''
-        Converts angles to motor goal positions
+        Converts angles to motor positions
         '''
         goal1 = map_to(a1, 0, 90, 826, 521)
         goal23 = map_to(180 - a23, 10, 180, 227, 820)
@@ -62,11 +69,12 @@ class Arm:
 
         return (goal1, goal23, goal4, goal5)
 
+
     def motors_to_angles(self, goal1, goal23, goal4, goal5):
         '''
-        Converts motor goal positions to angles
+        Converts motor positions to angles
         '''
-        a1 = map_to(goal1, 0, 100, -90, 90)
+        a1 = map_to(goal1, 826, 521, 0, 90)
         a23 = 180 - map_to(goal23, 227, 820, 10, 180)
         a4 = map_to(goal4, 804, 192, 0, 180)
         a5 = map_to(goal5, 213, 805, 90, -90)
@@ -74,11 +82,79 @@ class Arm:
         return (a1, a23, a4, a5)
 
 
+    def get_angles(self):
+        '''
+        Estimates joints angle based on servos positions
+        '''
+        return self.motors_to_angles(*self.get_position())
+
+    def get_position(self):
+        '''
+        Servos positions
+        '''
+        positions = self.dyn_chain.get_position()
+        return (positions[1], positions[2], positions[4], positions[5])
+
+    def motors_load(self):
+        '''
+        Ratio of maximal torque of each joints.
+        A value of  0.5 means 50% of maximmal torque applied in clockwise direction
+        A value of -0.25 means 25% of maximmal torque applied in counter-clockwise Direction
+
+        Return value is (motor1, motor2, motor4, motor5)
+        '''
+        loads = []
+
+        for i in [1, 2, 4, 5]:
+            present_load = self.dyn_chain.get_reg(i, "present_load")
+            ratio = (present_load & 1023) / 1023.0
+            direction = ((present_load >> 10) & 1) * 2 - 1
+
+            loads.append(ratio * direction)
+
+        return loads
+
+    def move_get_crochet(self):
+        pre_crochet = (602, 435, 767, 378)
+        get_crochet = (608, 534, 771, 463)
+        post_crochet = (602, 435, 767, 378)
+        figurine = (813, 709, 522, 440)
+        tyro = (190, 415, 624, 257)
+
+        self.write_goal(*pre_crochet, speed=75)
+
+        self.dyn_chain.wait_stopped()
+
+        self.write_goal(*get_crochet)
+
+        self.dyn_chain.wait_stopped()
+
+        time.sleep(1)
+
+        self.write_goal(*post_crochet, speed=50)
+
+        self.dyn_chain.wait_stopped()
+
+        self.write_goal(*figurine, speed=50)
+
+        self.dyn_chain.wait_stopped()
+
+        self.write_goal(*tyro, speed=50)
+
+        self.dyn_chain.wait_stopped()
+
+
 if __name__ == '__main__':
     arm = Arm()
 
-    # arm.open()
-    # arm.dyn_chain.goto(5, 512, 100)
-    print arm.goto(200, 0, 300, 0)
-    print arm.goto(0, 200, 300, 0)
-    print arm.goto(0, -200, 300, 0)
+    arm.open()
+
+    arm.move_get_crochet()
+
+    arm.disable_all()
+
+    print arm.get_position()
+
+    print arm.dyn_chain.get_reg(4, "present_load") & 1023
+
+    print arm.motors_load()
