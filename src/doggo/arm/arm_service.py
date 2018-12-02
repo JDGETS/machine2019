@@ -5,9 +5,9 @@ from rpyc.utils.server import ThreadedServer
 ARM = Arm() # thread-safe instance
 
 class ArmService(rpyc.Service):
-    def exposed_goto(self, x, y, z, r, speed=50):
-        ARM.goto(x, y, z, r, speed)
-
+    def _rpyc_getattr(self, name):
+        # expose everything of the ARM instance
+        return getattr(ARM, name)
 
 
 if __name__ == '__main__':
