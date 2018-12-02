@@ -12,6 +12,8 @@ y = 0
 z = 300
 r = 0
 
+step = 20
+
 os.system('xset r off')
 
 
@@ -21,20 +23,20 @@ def keydown(e):
     k = e.char
 
     if k == 'w':
-        x += 5
+        x += step
 
     if k == 's':
-        x -= 5
+        x -= step
 
     if k == 'e':
-        z += 5
+        z += step
     if k == 'd':
-        z -= 5
+        z -= step
 
 
 
     print (x, y, z, r)
-    pi.root.exposed_goto(x, y, z, r, speed=50)
+    pi.root.goto(x, y, z, r, speed=50)
 
 
 def keyup(e):
