@@ -14,6 +14,30 @@ def map_to(value, istart, istop, ostart, ostop):
     return 1.0*ostart + (1.0*ostop - 1.0*ostart) * ((1.0*value - 1.0*istart) / (1.0*istop - 1.0*istart))
 
 
+def motors_to_angles(self, goal1, goal23, goal4, goal5):
+    '''
+    Converts motor positions to angles
+    '''
+    a1 = map_to(goal1, 826, 521, 0, 90)
+    a23 = 180 - map_to(goal23, 227, 820, 10, 180)
+    a4 = map_to(goal4, 804, 192, 0, 180)
+    a5 = map_to(goal5, 213, 805, 90, -90)
+
+    return (a1, a23, a4, a5)
+
+
+def angles_to_motors(self, a1, a23, a4, a5):
+    '''
+    Converts angles to motor positions
+    '''
+    goal1 = map_to(a1, 0, 90, 826, 521)
+    goal23 = map_to(180 - a23, 10, 180, 227, 820)
+    goal4 = map_to(a4, 0, 180, 804, 192)
+    goal5 = map_to(a5, 90, -90, 213, 805)
+
+    return (goal1, goal23, goal4, goal5)
+
+
 class Arm:
     def __init__(self, port=USB_PORT):
         self.port = port
@@ -43,7 +67,7 @@ class Arm:
 
         joints = ik(*self.goal)
         joints = map(math.degrees, joints)
-        goals = self.angles_to_motors(*joints)
+        goals = angles_to_motors(*joints)
 
         return self.write_goal(*goals, speed=speed)
 
@@ -59,34 +83,12 @@ class Arm:
         '''
         self.dyn_chain.disable()
 
-    def angles_to_motors(self, a1, a23, a4, a5):
-        '''
-        Converts angles to motor positions
-        '''
-        goal1 = map_to(a1, 0, 90, 826, 521)
-        goal23 = map_to(180 - a23, 10, 180, 227, 820)
-        goal4 = map_to(a4, 0, 180, 804, 192)
-        goal5 = map_to(a5, 90, -90, 213, 805)
-
-        return (goal1, goal23, goal4, goal5)
-
-    def motors_to_angles(self, goal1, goal23, goal4, goal5):
-        '''
-        Converts motor positions to angles
-        '''
-        a1 = map_to(goal1, 826, 521, 0, 90)
-        a23 = 180 - map_to(goal23, 227, 820, 10, 180)
-        a4 = map_to(goal4, 804, 192, 0, 180)
-        a5 = map_to(goal5, 213, 805, 90, -90)
-
-        return (a1, a23, a4, a5)
-
 
     def get_angles(self):
         '''
         Estimates joints angle based on servos positions
         '''
-        return self.motors_to_angles(*self.get_position())
+        return motors_to_angles(*self.get_position())
 
     def get_position(self):
         '''
@@ -202,4 +204,3 @@ def main_test_rpc():
 if __name__ == '__main__':
     #main_test_crochets()
     #main_test_rpc()
-

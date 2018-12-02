@@ -29,9 +29,10 @@ def server_side():
 
 
 def client_side():
-    pi_hostname = 'raspberrypi-2'
+    pi_hostname = 'raspberrypi-1'
     pi = rpyc.connect(pi_hostname, 18861)
-    print pi.root.exposed_get_question()
+    print pi.root.exposed_goto(200, 0, 200, 0, speed=50)
+
 
 
 if __name__ == "__main__":
