@@ -24,7 +24,7 @@ class Arm:
         self.dyn_chain = DxlChain(self.port, rate=1000000)
         self.dyn_chain.open()
 
-        self.motors = self.dyn_chain.get_gmotor_list()
+        self.motors = self.dyn_chain.get_motor_list()
 
         assert len(self.motors) == 5, 'Some arm motors are missing. Expected 5 instead got %d' % len(self.motors)
 
@@ -37,12 +37,13 @@ class Arm:
     def goto(self, x, y, z, r, speed=50):
         '''
         Uses inverse kinematic to go to a position in space
-
         '''
+        r = math.radians(r)
         self.goal = Point(x, y, z, r)
 
         joints = ik(*self.goal)
         joints = map(math.degrees, joints)
+        print joints
         goals = self.angles_to_motors(*joints)
 
         return self.write_goal(*goals, speed=speed)
@@ -144,34 +145,7 @@ class Arm:
         self.dyn_chain.wait_stopped()
 
 
-# RPC service to have access to the arm remotely
-class ArmService(rpyc.Service):
 
-    def __init__(self):
-        self.arm = Arm()
-
-    def on_connect(self, conn):
-        # code that runs when a connection is created
-        # (to init the service, if needed)
-        self.arm.open()
-
-    def on_disconnect(self, conn):
-        # code that runs after the connection has already closed
-        # (to finalize the service, if needed)
-        self.arm.close()
-
-    # this is an exposed method
-    def exposed_move_to_pos(self, pose):
-
-        x = pose['x']
-        y = pose['y']
-        z = pose['z']
-        r = pose['r']
-
-        self.arm.goto(x, y, z, r)
-
-    def exposed_get_question(self):  # while this method is not exposed
-        return "what is the airspeed velocity of an unladen swallow?"
 
 
 def main_test_crochets():
@@ -191,15 +165,6 @@ def main_test_crochets():
     arm.close()
     print arm.motors_load()
 
-
-def main_test_rpc():
-    from rpyc.utils.server import ThreadedServer
-    RPC_PORT = 18861
-    t = ThreadedServer(ArmService, port=RPC_PORT)
-    t.start()
-
-
 if __name__ == '__main__':
-    #main_test_crochets()
-    #main_test_rpc()
-
+    main_test_crochets()
+    main_test_rpc()
