@@ -2,6 +2,7 @@
 import pigpio
 import math
 import rpyc
+import time
 
 # Rpi names
 rpi_green = "raspberrypi-1"
@@ -9,7 +10,7 @@ rpi_green_addr = "10.16.50.140"
 rpi_pink = "raspberry-rose"
 rpi_blue = "rPiBlue"
 rpi_blue_addr = "10.0.0.2"
-rpi_doggo_hostname = "raspberrypi-1"
+rpi_doggo_address = "192.168.0.160"
 
 # Rpc connection
 RPC_PORT = 31000
@@ -30,10 +31,11 @@ MOTOR_RIGHT_BACK_CHANNEL = 22
 MOTOR_LEFT_BACK_CHANNEL = 17
 MOTOR_FREQ_HZ = 100
 
-MOTOR_FL_CHANNEL = 0
-MOTOR_BL_CHANNEL = 1
-MOTOR_FR_CHANNEL = 2
-MOTOR_BR_CHANNEL = 3
+DOGGO_RIGHT_FOR_CHANNEL = 27
+DOGGO_LEFT_FOR_CHANNEL = 13
+DOGGO_RIGHT_BACK_CHANNEL = 17
+DOGGO_LEFT_BACK_CHANNEL = 12
+DOGGO_SOLENOID_CROCHET = 22
 
 # Choosing the robot to control
 PUPPER = 'pupper'
@@ -47,8 +49,24 @@ backwards = 1
 class MotionController:
     def __init__(self):
         self.acceleration_value = 0.1
-        self.pwm_controller = PWMController(rpi_doggo_hostname)
+        #self.pwm_controller = PWMController(rpi_doggo_hostname)
         # self.rpc_connection = rpyc.connect(rpi_green_addr, RPC_PORT)
+
+        ### new control
+        self.gpio = pigpio.pi(rpi_doggo_address)
+        self.speed = 0
+        self.state = 'stop'
+        self.target_x = 0
+        self.actual_x = 0
+
+        self.motor_left_actual_speed = 0
+        self.motor_left_target_speed = 0
+
+        self.motor_right_actual_speed = 0
+        self.motor_right_target_speed = 0
+
+        self.states = {}
+        ###
 
     def control_handle(self, controller_state, robot):
         # Mode de contrôle manuel du bras
@@ -57,7 +75,7 @@ class MotionController:
 
         # Controle manuel de la propulsion
         if controller_state.rightTrigger == 1 and robot == DOGGO:
-            self.doggo_motion_control(controller_state)
+            self.new_doggo_control(controller_state)
 
         if controller_state.rightTrigger == 1 and robot == PUPPER:
             self.pupper_motion_control(controller_state)
@@ -65,6 +83,66 @@ class MotionController:
         # Arrêt de la propulsion
         # if controller_state.rightTrigger == 0:
         #     self.pwm_controller.stop_all_motors()
+
+    def new_doggo_control(self, controller_state):
+
+        IGNORE_TRESHOLD = 3000.0
+
+        if controller_state.leftJoyY >= IGNORE_TRESHOLD:
+            self.state = 'forward'
+            self.motor_left_target_speed = 130
+            self.motor_right_target_speed = 130
+
+        elif controller_state.leftJoyY <= -IGNORE_TRESHOLD:
+            self.state = 'backward'
+            self.motor_left_target_speed = -100
+            self.motor_right_target_speed = -100
+
+        elif controller_state.rightJoyY >= IGNORE_TRESHOLD:
+            self.state = 'right'
+            self.motor_left_target_speed = 80
+            self.motor_right_target_speed = -80
+
+        elif controller_state.rightJoyY <= -IGNORE_TRESHOLD:
+            self.state = 'left'
+            self.motor_left_target_speed = -80
+            self.motor_right_target_speed = 80
+        else:
+            self.state = 'stop'
+            self.motor_left_target_speed = 0
+            self.motor_right_target_speed = 0
+
+        dx_left = self.sign(int(self.motor_left_target_speed * 10) - int(self.motor_left_actual_speed * 10))
+        dx_right = self.sign(int(self.motor_right_target_speed * 10) - int(self.motor_right_actual_speed * 10))
+
+        self.motor_left_actual_speed += dx_left * 5
+        self.motor_right_actual_speed += dx_right * 5
+
+        # eased_x = int(100 * ease_in_out_quad(self.actual_x / 100.0))
+
+        if self.motor_left_actual_speed < 0:
+            self.write_pwm([DOGGO_LEFT_BACK_CHANNEL], abs(self.motor_left_actual_speed))
+            self.write_pwm([DOGGO_LEFT_FOR_CHANNEL], 0)
+        else:
+            self.write_pwm([DOGGO_LEFT_FOR_CHANNEL], self.motor_left_actual_speed)
+            self.write_pwm([DOGGO_LEFT_BACK_CHANNEL], 0)
+
+        if self.motor_right_actual_speed < 0:
+            self.write_pwm([DOGGO_RIGHT_BACK_CHANNEL], abs(self.motor_right_actual_speed))
+            self.write_pwm([DOGGO_RIGHT_FOR_CHANNEL], 0)
+        else:
+            self.write_pwm([DOGGO_RIGHT_FOR_CHANNEL], self.motor_right_actual_speed)
+            self.write_pwm([DOGGO_RIGHT_BACK_CHANNEL], 0)
+
+        time.sleep(1 / 60.0)
+
+    def sign(self, x):
+        if x < 0:
+            return -1
+        if x > 0:
+            return 1
+
+        return 0
 
     def doggo_arm_control(self, controller_state):
         IGNORE_TRESHOLD = 3000
@@ -213,18 +291,15 @@ class MotionController:
                           'backward_left_pwm': 0}
 
         print(tracks_msg)
-        self.pwm_controller.doggo_pwm_motors(tracks_msg)
+        # self.pwm_controller.doggo_pwm_motors(tracks_msg)
 
-    def acceleration_function(self, value):
-        # TODO : arranger et implementer rampe acceleration
-        if value > pwm_half_range:
-            log = math.log10(value / pwm_range)
-            new_value = pwm_half_range + 128 * (1.0 - abs(log))
+    def write_pwm(self, pins, value):
+        for pin in pins:
+            if pin not in self.states or self.states[pin] != value:
+                self.states[pin] = value
 
-        else:
-            new_value = value
-
-        return int(new_value)
+                print ('write', pin, value)
+                self.gpio.set_PWM_dutycycle(pin, value)
 
 
 class PWMController:
