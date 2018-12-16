@@ -10,7 +10,7 @@ chain.open()
 
 print chain.get_motor_list()
 
-motor_id = 1
+motor_id = 8
 
 chain.ping(motor_id)
 
@@ -36,7 +36,7 @@ while True:
     print 'load = %d\tspeed = %d rpm\ttemp = %d' % (load, speed, temp)
 
     # wait 500 millis
-    if i > 0.5 and abs(speed) <= 40:
+    if i > 0.250 and abs(speed) <= 40:
         break
 
     chain.set_reg(motor_id, 'moving_speed', 512 + 1024)

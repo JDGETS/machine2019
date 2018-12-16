@@ -11,7 +11,7 @@ chain.open()
 chain.get_motor_list()
 
 
-motor_id = 1
+motor_id = 8
 
 chain.set_reg(motor_id, 'cw_angle_limit', 0)
 chain.set_reg(motor_id, 'ccw_angle_limit', 0)
