@@ -4,6 +4,7 @@ from collections import namedtuple
 import math
 import time
 import rpyc
+import pigpio
 
 USB_PORT = '/dev/ttyUSB0'
 
@@ -14,7 +15,7 @@ def map_to(value, istart, istop, ostart, ostop):
     return 1.0*ostart + (1.0*ostop - 1.0*ostart) * ((1.0*value - 1.0*istart) / (1.0*istop - 1.0*istart))
 
 
-def motors_to_angles(self, goal1, goal23, goal4, goal5):
+def motors_to_angles(goal1, goal23, goal4, goal5):
     '''
     Converts motor positions to angles
     '''
@@ -26,7 +27,7 @@ def motors_to_angles(self, goal1, goal23, goal4, goal5):
     return (a1, a23, a4, a5)
 
 
-def angles_to_motors(self, a1, a23, a4, a5):
+def angles_to_motors(a1, a23, a4, a5):
     '''
     Converts angles to motor positions
     '''
@@ -43,20 +44,28 @@ class Arm:
         self.port = port
         self.goal = Point(0, 0, 0, 0)
         self.opened = False
+        self.pi = None
 
     def open(self):
+        self.pi = pigpio.pi()
         self.dyn_chain = DxlChain(self.port, rate=1000000)
         self.dyn_chain.open()
 
         self.motors = self.dyn_chain.get_motor_list()
 
-        assert len(self.motors) == 5, 'Some arm motors are missing. Expected 5 instead got %d' % len(self.motors)
+        assert len(self.motors) == 6, 'Some arm motors are missing. Expected 6 instead got %d' % len(self.motors)
 
         self.opened = True
 
     def close(self):
         self.opened = False
         self.dyn_chain.close()
+
+    def release(self):
+        self.pi.set_PWM_dutycycle(22, 120)
+        time.sleep(0.5)
+        self.pi.set_PWM_dutycycle(22, 0)
+
 
     def goto(self, x, y, z, r, speed=50):
         '''
@@ -154,17 +163,17 @@ def main_test_crochets():
     arm = Arm()
     arm.open()
 
-    arm.move_get_crochet()
 
-    arm.disable_all()
+    # arm.disable_all()
 
-    print arm.get_position()
+    print arm.dyn_chain.get_motor_list(broadcast=False)
 
-    print arm.dyn_chain.get_reg(4, "present_load") & 1023
-    print arm.motors_load()
+
+    # print arm.get_position()
+
 
     arm.close()
-    print arm.motors_load()
 
 if __name__ == '__main__':
+    main_test_crochets()
     pass
