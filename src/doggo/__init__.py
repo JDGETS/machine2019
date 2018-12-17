@@ -20,11 +20,12 @@ def main():
     print 'ready'
     print 'launching cameras...'
 
-    os.system(stream_cmd % config.doggo_arm_ip)
-    os.system(stream_cmd % config.doggo_overview_ip)
+    if not os.getenv('NO_CAMERA'):
+        os.system(stream_cmd % config.doggo_arm_ip)
+        os.system(stream_cmd % config.doggo_overview_ip)
+        
+        time.sleep(1)
 
-    time.sleep(1)
-
-    os.system('''i3-msg '[class="MPlayer"] floating enable' ''')
+        os.system('''i3-msg '[class="MPlayer"] floating enable' ''')
 
     ui.main()

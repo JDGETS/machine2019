@@ -84,7 +84,11 @@ class Arm:
         '''
         Write goal positions of all servos with given speed
         '''
-        self.dyn_chain.sync_write_pos_speed([1, 2, 3, 4, 5], [goal1, goal23, 1023 - goal23, goal4, goal5], [speed]*5)
+        if isinstance(speed, list):
+            s1, s23, s4, s5 = speed
+            self.dyn_chain.sync_write_pos_speed([1, 2, 3, 4, 5], [goal1, goal23, 1023 - goal23, goal4, goal5], [s1, s23, s23, s4, s5])
+        else:
+            self.dyn_chain.sync_write_pos_speed([1, 2, 3, 4, 5], [goal1, goal23, 1023 - goal23, goal4, goal5], [speed]*5)
 
     def disable_all(self):
         '''

@@ -36,6 +36,21 @@ def keydown(e):
         grip_state = not grip_state
         set_grip(grip_state)
 
+    if e.char == 'p':
+        arm.disable_all()
+        print arm.get_position()
+
+    if e.char == 'b':
+        arm.write_goal(605, 408, 772, 415)
+
+    if e.char == 'n':
+        arm.write_goal(605, 483, 771, 436)
+
+    if e.char == 'm':
+        arm.write_goal(466, 772, 371, 312, speed=[50])
+
+
+
 
 def keyup(e):
     if e.char in keys:
@@ -65,7 +80,6 @@ def main():
     running = False
 
     t.join()
-
 
 
 class gpioloop(Thread):
