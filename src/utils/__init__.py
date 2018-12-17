@@ -12,3 +12,12 @@ def host_ready(host, port=22):
 def wait_for_host(host, port=22):
     while not host_ready(host, port):
         print '.'
+
+
+def sign(x):
+    if x < 0:
+        return -1
+    if x > 0:
+        return 1
+
+    return 0

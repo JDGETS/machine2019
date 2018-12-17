@@ -12,10 +12,10 @@ doggo_control_ip = '192.168.0.160'
 doggo_arm_ip = '192.168.0.161'
 doggo_overview_ip = '192.168.0.162'
 
-doggo_motor_left_for_chanel = 13
-doggo_motor_left_back_chanel = 12
-doggo_motor_right_for_chanel = 27
-doggo_motor_right_back_chanel = 17
+doggo_motor_left_for_channel = 13
+doggo_motor_left_back_channel = 12
+doggo_motor_right_for_channel = 27
+doggo_motor_right_back_channel = 17
 
 pupper_defaults = {
 
