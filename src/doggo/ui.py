@@ -47,9 +47,10 @@ def keydown(e):
         arm.write_goal(605, 483, 771, 436)
 
     if e.char == 'm':
-        arm.write_goal(466, 772, 371, 312, speed=[50])
+        arm.write_goal(469, 768, 341, 301, speed=[50, 50, 100, 50])
 
-
+    if e.char == 'l':
+        arm.write_goal(195, 415, 550, 193, speed=[50, 75, 50, 100])
 
 
 def keyup(e):
@@ -95,6 +96,8 @@ class gpioloop(Thread):
 
         self.motor_right_actual_speed = 0
         self.motor_right_target_speed = 0
+
+        self.base_direction = 0
 
         self.states = {}
 
@@ -150,7 +153,21 @@ class gpioloop(Thread):
                 self.write_pwm([config.doggo_motor_right_back_channel], 0)
 
 
+            if 'o' in keys:
+                self.set_base_direction(1)
+            elif 'i' in keys:
+                self.set_base_direction(-1)
+            else:
+                self.set_base_direction(0)
+
+
             time.sleep(1/60.0)
+
+    def set_base_direction(self, direction):
+        if self.base_direction != direction:
+            arm.move_base(direction)
+            self.base_direction = direction
+
 
     def write_pwm(self, pins, value):
         for pin in pins:

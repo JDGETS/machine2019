@@ -97,6 +97,19 @@ class Arm:
         self.dyn_chain.disable()
 
 
+    def move_base(self, direction, speed=30):
+        '''
+        Moves the base in the given direction at the given speed
+        Direction = 1 / -1 for cw/ccw direction, 0 => stop
+        '''
+
+        if direction == 1:
+            self.dyn_chain.goto(1, 0, speed=speed, blocking=False)
+        elif direction == -1:
+            self.dyn_chain.goto(1, 835, speed=speed, blocking=False)
+        else:
+            self.dyn_chain.disable(1)
+
     def get_angles(self):
         '''
         Estimates joints angle based on servos positions
