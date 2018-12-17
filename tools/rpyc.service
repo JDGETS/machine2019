@@ -1,0 +1,11 @@
+[Unit]
+Description=Python Arm RPC server
+After=network.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/machine2019/src/doggo/arm
+ExecStart=/usr/bin/python arm_service.py
+
+[Install]
+WantedBy=multi-user.target

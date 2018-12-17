@@ -6,13 +6,12 @@ import pigpio
 from threading import Thread
 import time
 
+MOTOR_LEFT_FOR_CHANEL = 13
+MOTOR_LEFT_BACK_CHANEL = 12
 MOTOR_RIGHT_FOR_CHANEL = 27
 MOTOR_RIGHT_BACK_CHANEL = 17
-MOTOR_LEFT_FOR_CHANEL = 22
-MOTOR_LEFT_BACK_CHANEL = 26
 
-
-pi_hostname = 'raspberrypi-vert'
+pi_hostname = 'doggo-control'
 # pi = rpyc.connect(pi_hostname, 18861).root
 gpio = pigpio.pi(pi_hostname)
 
@@ -94,8 +93,8 @@ class gpioloop(Thread):
         while running:
             if 'w' in keys:
                 self.state = 'forward'
-                self.motor_left_target_speed = 100
-                self.motor_right_target_speed = 100
+                self.motor_left_target_speed = 200
+                self.motor_right_target_speed = 200
 
             elif 's' in keys:
                 self.state = 'backward'
@@ -104,13 +103,13 @@ class gpioloop(Thread):
 
             elif 'd' in keys:
                 self.state = 'right'
-                self.motor_left_target_speed = 50
-                self.motor_right_target_speed = -50
+                self.motor_left_target_speed = 150
+                self.motor_right_target_speed = -150
 
             elif 'a' in keys:
                 self.state = 'left'
-                self.motor_left_target_speed = -50
-                self.motor_right_target_speed = 50
+                self.motor_left_target_speed = -150
+                self.motor_right_target_speed = 150
             else:
                 self.state = 'stop'
                 self.motor_left_target_speed = 0
@@ -120,8 +119,8 @@ class gpioloop(Thread):
             dx_left = sign(int(self.motor_left_target_speed * 10) - int(self.motor_left_actual_speed * 10))
             dx_right = sign(int(self.motor_right_target_speed * 10) - int(self.motor_right_actual_speed * 10))
 
-            self.motor_left_actual_speed += dx_left * 5
-            self.motor_right_actual_speed += dx_right * 5
+            self.motor_left_actual_speed += dx_left * 10
+            self.motor_right_actual_speed += dx_right * 10
 
             # eased_x = int(100 * ease_in_out_quad(self.actual_x / 100.0))
 
@@ -148,14 +147,15 @@ class gpioloop(Thread):
                 self.states[pin] = value
 
                 print ('write', pin, value)
-                gpio.set_PWM_dutycycle(pin, value)
+                # gpio.set_PWM_dutycycle(pin, value)
 
 
 t = gpioloop()
 t.start()
 
 try:
-    mainloop()
+    # mainloop()
+    pass
 except:
     pass
 

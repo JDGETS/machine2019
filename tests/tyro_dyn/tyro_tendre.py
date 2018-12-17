@@ -6,40 +6,45 @@ chain = DxlChain("/dev/ttyUSB0", rate=1000000)
 chain.open()
 
 
-chain.motors[250] = DxlMotor.instantiateMotor(250, 12)
+# chain.motors[250] = DxlMotor.instantiateMotor(250, 12)
 
-# chain.get_motor_list(broadcast=False)
+print chain.get_motor_list()
 
-motor_id = 250
+motor_id = 8
 
 chain.ping(motor_id)
 
-chain.set_reg(250, 'max_torque', 1023)
-chain.set_reg(250, 'torque_limit', 1023)
+
+chain.set_reg(motor_id, 'cw_angle_limit', 0)
+chain.set_reg(motor_id, 'ccw_angle_limit', 0)
+
+chain.set_reg(motor_id, 'max_torque', 1023)
+chain.set_reg(motor_id, 'torque_limit', 1023)
+
+i = 0
 
 while True:
-    load = chain.get_reg(250, 'present_load')
+    load = chain.get_reg(motor_id, 'present_load')
     direction = (load >> 10) & 1
     load = load & 1023
 
-    speed = chain.get_reg(250, 'present_speed') & 1023
+    speed = chain.get_reg(motor_id, 'present_speed') & 1023
+    speed = (2 * direction - 1) * speed * 0.111
+    temp =  chain.get_reg(motor_id, 'present_temp')
 
 
-    print 'load = %d\tdir = %d\tspeed = %d' % (load, direction, speed)
+    print 'load = %d\tspeed = %d rpm\ttemp = %d' % (load, speed, temp)
 
-    if load > 50:
-        count += 1
-    else:
-        count = 0
-
-    if count > 20:
+    # wait 500 millis
+    if i > 0.250 and abs(speed) <= 40:
         break
 
-
-    chain.set_reg(250, 'moving_speed', 512)
+    chain.set_reg(motor_id, 'moving_speed', 512 + 1024)
 
     time.sleep(0.1)
 
+    i += 0.1
 
-chain.set_reg(250, 'moving_speed', 0)
-chain.set_reg(250, 'torque_enable', 0)
+
+chain.set_reg(motor_id, 'moving_speed', 0)
+chain.set_reg(motor_id, 'torque_enable', 0)
