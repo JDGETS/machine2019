@@ -125,16 +125,6 @@ class Arm:
 
         return loads
 
-    def set_grip(self, state=True):
-        if state:
-            pi.set_servo_pulsewidth(22, 1500)
-        else:
-            pi.set_servo_pulsewidth(22, 1200)
-
-        time.sleep(0.5)
-        pi.set_servo_pulsewidth(22, 0)
-
-
     def move_get_crochet(self):
         pre_crochet = (602, 435, 767, 378)
         get_crochet = (608, 534, 771, 463)

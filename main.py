@@ -9,7 +9,5 @@ import pupper
 if sys.argv[1] == 'doggo':
     doggo.main()
 elif sys.argv[1] == 'pupper':
-    instance = int(sys.argv[1][-1])
-
-    pupper.main(instance)
+    pupper.main()
 
