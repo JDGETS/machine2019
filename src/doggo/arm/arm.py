@@ -210,6 +210,9 @@ class Arm:
 
         self.dyn_chain.wait_stopped()
 
+    def wait_stopped(self):
+        self.dyn_chain.wait_stopped([1, 2, 3, 4, 5])
+
 
 
 
