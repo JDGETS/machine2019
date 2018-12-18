@@ -66,6 +66,18 @@ class Arm:
         time.sleep(0.5)
         self.pi.set_PWM_dutycycle(22, 0)
 
+    def goto2D(self, y, z, r, speed=50):
+        '''
+        Uses inverse kinematic to go to a position in planar space (only y and z)
+        '''
+        r = math.radians(r)
+        self.goal = Point(0, y, z, r)
+
+        joints = ik(*self.goal)
+        joints = map(math.degrees, joints)
+        goals = angles_to_motors(*joints)
+
+        return self.write_goal_without_base(goals[1], goals[2], goals[3], speed=speed)
 
     def goto(self, x, y, z, r, speed=50):
         '''
@@ -79,6 +91,33 @@ class Arm:
         goals = angles_to_motors(*joints)
 
         return self.write_goal(*goals, speed=speed)
+
+    def write_goal_without_base(self, goal23, goal4, goal5, speed=50):
+        '''
+        Write goal positions of all servos with given speed
+        '''
+        if not goal5 <= 200 and not goal5 >= 800:
+            if isinstance(speed, list):
+                s23, s4, s5 = speed
+                self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [s23, s23, s4, s5])
+            else:
+                self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [speed]*5)
+
+        elif goal5 <= 200:
+            goal5 = 200
+            if isinstance(speed, list):
+                s23, s4, s5 = speed
+                self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [s23, s23, s4, s5])
+            else:
+                self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [speed]*5)
+
+        elif goal5 >= 800:
+            goal5 = 800
+            if isinstance(speed, list):
+                s23, s4, s5 = speed
+                self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [s23, s23, s4, s5])
+            else:
+                self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [speed]*5)
 
     def write_goal(self, goal1, goal23, goal4, goal5, speed=50):
         '''

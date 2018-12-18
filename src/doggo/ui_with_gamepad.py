@@ -5,6 +5,7 @@ import inputs
 from inputs import get_gamepad
 from threading import Thread
 import time
+import rpyc
 
 MOTOR_RIGHT_FOR_CHANEL = 27
 MOTOR_RIGHT_BACK_CHANEL = 17
@@ -15,15 +16,21 @@ SOLENOID_SERVO = 22
 
 JOYSTICK_IGNORE_THRESHOLD = 32000
 
+# Remote gpio and RPC connection
 pi_hostname = 'doggo-control'
-# pi = rpyc.connect(pi_hostname, 18861).root
+rpc_pi = rpyc.connect(pi_hostname, 18861).root
 gpio = pigpio.pi(pi_hostname)
 
 x = 200
 y = 0
 z = 300
 r = 0
-step = 20
+
+# Moving speed
+movement_speed = 150
+rotation_speed = 120
+
+arm_step = 3
 
 master = Tk()
 
@@ -97,6 +104,7 @@ class gamepadloop(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.right_trigger = False
+        self.left_trigger = False
 
     def run(self):
 
@@ -121,7 +129,62 @@ class gamepadloop(Thread):
                     # Controle du mouvement avec joysticks et trigger
                     if event.ev_type == "Absolute":
 
-                        # Si le right trigger est enfonce
+                        # Si le left trigger est enfonce : controle du bras
+                        if event.code == "ABS_Z" and event.state == 255:
+                            self.left_trigger = True
+
+                        # Si le right trigger est relache
+                        elif event.code == "ABS_Z" and event.state < 200:
+                            self.left_trigger = False
+                            if 'up_z' in pad_keys:
+                                del pad_keys['up_z']
+                            if 'down_z' in pad_keys:
+                                del pad_keys['down_z']
+                            if 'for_y' in pad_keys:
+                                del pad_keys['for_y']
+                            if 'back_y' in pad_keys:
+                                del pad_keys['back_y']
+
+                        # left joystick Y
+                        elif event.code == "ABS_Y":
+                            if event.state > JOYSTICK_IGNORE_THRESHOLD and self.left_trigger:
+                                if 'back_y' in pad_keys:
+                                    del pad_keys['back_y']
+
+                                pad_keys['back_y'] = 1
+
+                            elif event.state < -JOYSTICK_IGNORE_THRESHOLD and self.left_trigger:
+                                if 'for_y' in pad_keys:
+                                    del pad_keys['for_y']
+
+                                pad_keys['for_y'] = 1
+
+                            else:
+                                if 'back_y' in pad_keys:
+                                    del pad_keys['back_y']
+                                if 'for_y' in pad_keys:
+                                    del pad_keys['for_y']
+
+                        elif event.code == "ABS_RY":  # right joystick Y
+                            if event.state > JOYSTICK_IGNORE_THRESHOLD and self.left_trigger:
+                                if 'down_z' in pad_keys:
+                                    del pad_keys['down_z']
+
+                                pad_keys['down_z'] = 1
+
+                            elif event.state < -JOYSTICK_IGNORE_THRESHOLD and self.left_trigger:
+                                if 'up_z' in pad_keys:
+                                    del pad_keys['up_z']
+
+                                pad_keys['up_z'] = 1
+
+                            else:
+                                if 'up_z' in pad_keys:
+                                    del pad_keys['up_z']
+                                if 'down_z' in pad_keys:
+                                    del pad_keys['down_z']
+
+                        # Si le right trigger est enfonce : controle du robot
                         if event.code == "ABS_RZ" and event.state == 255:
                             self.right_trigger = True
 
@@ -191,34 +254,54 @@ class gpioloop(Thread):
         self.motor_right_actual_speed = 0
         self.motor_right_target_speed = 0
 
+        self.arm_y = 200
+        self.arm_z = 250
+
         self.states = {}
 
     def run(self):
         while running:
             if 'w' in keys or 'forward' in pad_keys:
                 self.state = 'forward'
-                self.motor_left_target_speed = 120
-                self.motor_right_target_speed = 120
+                self.motor_left_target_speed = movement_speed
+                self.motor_right_target_speed = movement_speed
 
             elif 's' in keys or 'backward' in pad_keys:
                 self.state = 'backward'
-                self.motor_left_target_speed = -120
-                self.motor_right_target_speed = -120
+                self.motor_left_target_speed = -movement_speed
+                self.motor_right_target_speed = -movement_speed
 
             elif 'd' in keys or 'right' in pad_keys:
                 self.state = 'right'
-                self.motor_left_target_speed = 120
-                self.motor_right_target_speed = -120
+                self.motor_left_target_speed = rotation_speed
+                self.motor_right_target_speed = -rotation_speed
 
             elif 'a' in keys or 'left' in pad_keys:
                 self.state = 'left'
-                self.motor_right_target_speed = 120
-                self.motor_left_target_speed = -120
+                self.motor_right_target_speed = rotation_speed
+                self.motor_left_target_speed = -rotation_speed
 
+            elif 'for_y' in pad_keys:
+                self.state = 'arm_forward'
+                self.arm_y += arm_step
+
+            elif 'back_y' in pad_keys:
+                self.state = 'arm_backwards'
+                self.arm_y -= arm_step
+
+            elif 'up_z' in pad_keys:
+                self.state = 'arm_up'
+                self.arm_z += arm_step
+
+            elif 'down_z' in pad_keys:
+                self.state = 'arm_down'
+                self.arm_z -= arm_step
             else:
                 self.state = 'stop'
                 self.motor_left_target_speed = 0
                 self.motor_right_target_speed = 0
+
+            rpc_pi.goto2D(self.arm_y, self.arm_z, 0)
 
             dx_left = sign(int(self.motor_left_target_speed * 10) - int(self.motor_left_actual_speed * 10))
             dx_right = sign(int(self.motor_right_target_speed * 10) - int(self.motor_right_actual_speed * 10))
