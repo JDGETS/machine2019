@@ -11,6 +11,39 @@ USB_PORT = '/dev/ttyUSB0'
 Point = namedtuple('Point', ['x', 'y', 'z', 'r'])
 
 
+class TyroManager(Thread):
+    def __init__(self, chain, motor_id=8):
+        Thread.__init__(self)
+        self.state = "detendre"
+        self.running = True
+        self.chain = chain
+        self.motor_id = motor_id
+
+        chain.set_reg(self.motor_id, 'cw_angle_limit', 0)
+        chain.set_reg(self.motor_id, 'ccw_angle_limit', 0)
+
+    def run(self):
+        while self.running:
+            if self.state == "detendre":
+                self.detendre()
+            else:
+                self.tendre()
+
+            time.sleep(0.1)
+
+    def detendre(self):
+        load = chain.get_reg(motor_id, 'present_load')
+        direction = load >> 10
+        load = load % 1023
+
+        if load >= 9:
+            chain.set_reg(motor_id, 'moving_speed', 1023)
+            time.sleep(1)
+            chain.set_reg(motor_id, 'moving_speed', 0)
+            time.sleep(0.2)
+
+
+
 def map_to(value, istart, istop, ostart, ostop):
     return 1.0*ostart + (1.0*ostop - 1.0*ostart) * ((1.0*value - 1.0*istart) / (1.0*istop - 1.0*istart))
 
@@ -45,11 +78,16 @@ class Arm:
         self.goal = Point(0, 0, 0, 0)
         self.opened = False
         self.pi = None
+        
+        self.open()
+
 
     def open(self):
         self.pi = pigpio.pi()
         self.dyn_chain = DxlChain(self.port, rate=1000000)
         self.dyn_chain.open()
+        self.tyro_manager = TyroManager(self.dyn_chain)
+        self.tyro_manager.start()
 
         self.motors = self.dyn_chain.get_motor_list()
 
