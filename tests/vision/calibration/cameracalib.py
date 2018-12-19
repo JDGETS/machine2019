@@ -20,11 +20,11 @@ import sys
 import argparse
 
 #---------------------- SET THE PARAMETERS
-nRows = 7
-nCols = 5
-dimension = 25 #- mm
+nRows = 9
+nCols = 6
+dimension = 40 #- mm
 
-workingFolder   = "./camera_02"
+workingFolder   = "./camera_verte_hd"
 imageType       = 'jpg'
 #------------------------------------------
 
@@ -94,9 +94,10 @@ else:
 
             # Draw and display the corners
             cv2.drawChessboardCorners(img, (nCols,nRows), corners2,ret)
-            cv2.imshow('img',img)
+            #cv2.imshow('img',img)
             # cv2.waitKey(0)
-            k = cv2.waitKey(0) & 0xFF
+            #k = cv2.waitKey(1) & 0xFF
+            k= 1
             if k == 27: #-- ESC Button
                 print "Image Skipped"
                 imgNotGood = fname
