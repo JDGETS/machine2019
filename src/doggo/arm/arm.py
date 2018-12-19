@@ -20,8 +20,8 @@ class TyroManager(Thread):
         self.chain = chain
         self.motor_id = motor_id
 
-        chain.set_reg(self.motor_id, 'cw_angle_limit', 0)
-        chain.set_reg(self.motor_id, 'ccw_angle_limit', 0)
+        self.chain.set_reg(self.motor_id, 'cw_angle_limit', 0)
+        self.chain.set_reg(self.motor_id, 'ccw_angle_limit', 0)
 
     def run(self):
         while self.running:
@@ -33,14 +33,15 @@ class TyroManager(Thread):
             time.sleep(0.1)
 
     def detendre(self):
-        load = chain.get_reg(motor_id, 'present_load')
+        load = self.chain.get_reg(motor_id, 'present_load')
         direction = load >> 10
         load = load % 1023
 
         if load >= 9:
-            chain.set_reg(motor_id, 'moving_speed', 1023)
+            self.chain.set_reg(motor_id, 'moving_speed', 1023)
             time.sleep(1)
-            chain.set_reg(motor_id, 'moving_speed', 0)
+            
+            self.chain.set_reg(motor_id, 'moving_speed', 0)
             time.sleep(0.2)
 
 
@@ -94,7 +95,7 @@ class Arm:
 
         self.tyro_manager = TyroManager(self.dyn_chain)
         self.tyro_manager.start()
-        
+
         self.opened = True
 
     def close(self):
