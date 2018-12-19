@@ -2,6 +2,7 @@ from ik import ik
 from dxl.dxlchain import DxlChain
 from collections import namedtuple
 import math
+from threading import Thread
 import time
 import rpyc
 import pigpio
@@ -78,7 +79,7 @@ class Arm:
         self.goal = Point(0, 0, 0, 0)
         self.opened = False
         self.pi = None
-        
+
         self.open()
 
 
