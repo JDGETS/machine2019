@@ -87,13 +87,14 @@ class Arm:
         self.pi = pigpio.pi()
         self.dyn_chain = DxlChain(self.port, rate=1000000)
         self.dyn_chain.open()
-        self.tyro_manager = TyroManager(self.dyn_chain)
-        self.tyro_manager.start()
 
         self.motors = self.dyn_chain.get_motor_list()
 
         assert len(self.motors) == 6, 'Some arm motors are missing. Expected 6 instead got %d' % len(self.motors)
 
+        self.tyro_manager = TyroManager(self.dyn_chain)
+        self.tyro_manager.start()
+        
         self.opened = True
 
     def close(self):
