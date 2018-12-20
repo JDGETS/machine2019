@@ -21,6 +21,7 @@ class TyroManager(Thread):
         self.motor_id = motor_id
         self.speed = 512
         self.moving = False
+        self.start_time = 0
 
 
     def run(self):
@@ -31,7 +32,6 @@ class TyroManager(Thread):
             if self.state == 'detendre':
                 self.detendre()
             elif self.state == 'tendre':
-                self.moving = False
                 self.tendre()
             else:
                 pass
@@ -57,11 +57,13 @@ class TyroManager(Thread):
         speed = (2 * direction - 1) * speed * 0.111
 
         if not self.moving:
+            self.start_time = time.time()
             self.moving = True
             self.chain.set_reg(self.motor_id, 'moving_speed', self.speed + 1024)
 
-        if speed <= 40:
+        if (time.time() - self.start_time) > 0.2 and speed <= 40:
             self.state = 'manuel'
+            self.moving = False
             self.chain.set_reg(self.motor_id, 'moving_speed', 0)
 
 
