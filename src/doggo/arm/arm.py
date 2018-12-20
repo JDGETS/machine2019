@@ -51,13 +51,12 @@ class TyroManager(Thread):
             time.sleep(0.2)
 
     def tendre(self):
-        speed = chain.get_reg(motor_id, 'present_speed') & 1023
+        speed = self.chain.get_reg(motor_id, 'present_speed') & 1023
         speed = (2 * direction - 1) * speed * 0.111
 
         if not self.moving:
             self.moving = True
-            print 'GO SPEED = %d' % self.speed
-            chain.set_reg(motor_id, 'moving_speed', self.speed + 1024)
+            self.chain.set_reg(motor_id, 'moving_speed', self.speed + 1024)
 
         if abs(speed) <= 40:
             self.state = 'manuel'
