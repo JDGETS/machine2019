@@ -28,7 +28,9 @@ while True:
     direction = (load >> 10) & 1
     load = load & 1023
 
-    speed = chain.get_reg(motor_id, 'present_speed') & 1023
+    speed = chain.get_reg(motor_id, 'present_speed')
+
+    speed = speed  & 1023
     speed = (2 * direction - 1) * speed * 0.111
     temp =  chain.get_reg(motor_id, 'present_temp')
 
