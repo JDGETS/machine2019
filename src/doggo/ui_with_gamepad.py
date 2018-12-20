@@ -9,8 +9,8 @@ import rpyc
 
 MOTOR_RIGHT_FOR_CHANEL = 27
 MOTOR_RIGHT_BACK_CHANEL = 17
-MOTOR_LEFT_FOR_CHANEL = 13
-MOTOR_LEFT_BACK_CHANEL = 12
+MOTOR_LEFT_FOR_CHANEL = 26
+MOTOR_LEFT_BACK_CHANEL = 22
 
 SOLENOID_SERVO = 22
 
@@ -18,8 +18,8 @@ JOYSTICK_IGNORE_THRESHOLD = 32000
 
 # Remote gpio and RPC connection
 pi_hostname = 'doggo-control'
-rpc_pi = rpyc.connect(pi_hostname, 18861).root
-gpio = pigpio.pi(pi_hostname)
+# rpc_pi = rpyc.connect(pi_hostname, 18861).root
+gpio = pigpio.pi('192.168.0.101')
 
 x = 200
 y = 0
@@ -67,9 +67,9 @@ def keydown(e):
     if k == 'l':
 
         if light_state:
-            gpio.set_PWM_dutycycle(10, 50)
+            gpio.set_PWM_dutycycle(5, 100)
         else:
-            gpio.set_PWM_dutycycle(10, 0)
+            gpio.set_PWM_dutycycle(5, 0)
 
         light_state = not light_state
 
@@ -301,7 +301,7 @@ class gpioloop(Thread):
                 self.motor_left_target_speed = 0
                 self.motor_right_target_speed = 0
 
-            rpc_pi.goto2D(self.arm_y, self.arm_z, 0)
+            #rpc_pi.goto2D(self.arm_y, self.arm_z, 0)
 
             dx_left = sign(int(self.motor_left_target_speed * 10) - int(self.motor_left_actual_speed * 10))
             dx_right = sign(int(self.motor_right_target_speed * 10) - int(self.motor_right_actual_speed * 10))
