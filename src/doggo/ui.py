@@ -1,8 +1,8 @@
 import config
 import pigpio
 import rpyc
-import inputs
-from inputs import get_gamepad
+# import inputs
+# from inputs import get_gamepad
 import time
 from Tkinter import *
 from threading import Thread
@@ -96,8 +96,7 @@ def keyup(e):
 def main():
     global arm, gpio, w, running
 
-    #ip = config.get_param('control_ip')
-    ip = "192.168.0.103"
+    ip = config.get_param('control_ip')
     arm = rpyc.connect(ip, 18861).root
     gpio = pigpio.pi(ip)
 

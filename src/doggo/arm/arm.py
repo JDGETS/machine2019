@@ -15,20 +15,23 @@ Point = namedtuple('Point', ['x', 'y', 'z', 'r'])
 class TyroManager(Thread):
     def __init__(self, chain, motor_id=8):
         Thread.__init__(self)
-        self.state = "detendre"
+        self.state = 'detendre'
         self.running = True
         self.chain = chain
         self.motor_id = motor_id
+        self.speed = 512
 
         self.chain.set_reg(self.motor_id, 'cw_angle_limit', 0)
         self.chain.set_reg(self.motor_id, 'ccw_angle_limit', 0)
 
     def run(self):
         while self.running:
-            if self.state == "detendre":
+            if self.state == 'detendre':
                 self.detendre()
-            else:
+            elif self.state == 'tendre':
                 self.tendre()
+            else:
+                pass
 
             time.sleep(0.1)
 
@@ -37,13 +40,21 @@ class TyroManager(Thread):
         direction = load >> 10
         load = load % 1023
 
-        if load >= 9:
-            self.chain.set_reg(self.motor_id, 'moving_speed', 1023)
+        if load >= 10:
+            self.chain.set_reg(self.motor_id, 'moving_speed', self.speed)
             time.sleep(1)
 
             self.chain.set_reg(self.motor_id, 'moving_speed', 0)
             time.sleep(0.2)
 
+    def tendre(self):
+        speed = chain.get_reg(motor_id, 'present_speed') & 1023
+        speed = (2 * direction - 1) * speed * 0.111
+
+        chain.set_reg(motor_id, 'moving_speed', self.speed + 1024)
+
+        if abs(speed) <= 40:
+            self.state = 'manuel'
 
 
 def map_to(value, istart, istop, ostart, ostop):
@@ -222,40 +233,38 @@ class Arm:
 
         return loads
 
-    def move_get_crochet(self):
-        pre_crochet = (602, 435, 767, 378)
-        get_crochet = (608, 534, 771, 463)
-        post_crochet = (602, 435, 767, 378)
-        figurine = (813, 709, 522, 440)
-        tyro = (190, 415, 624, 257)
-
-        self.write_goal(*pre_crochet, speed=75)
-
-        self.dyn_chain.wait_stopped()
-
-        self.write_goal(*get_crochet)
-
-        self.dyn_chain.wait_stopped()
-
-        time.sleep(1)
-
-        self.write_goal(*post_crochet, speed=50)
-
-        self.dyn_chain.wait_stopped()
-
-        self.write_goal(*figurine, speed=50)
-
-        self.dyn_chain.wait_stopped()
-
-        self.write_goal(*tyro, speed=50)
-
-        self.dyn_chain.wait_stopped()
-
     def wait_stopped(self):
+        '''
+        Sleeps until all the motors reached their goals
+        '''
         self.dyn_chain.wait_stopped([1, 2, 3, 4, 5])
 
+    def stop_movement(self):
+        '''
+        Sets the goal to the current position of the motors
+        '''
+        positions = self.get_position()
+        self.write_goal(*positions)
 
+    def wait_stopped_sleep(self, sleep=time.sleep):
+        '''
+        Sleeps using the provided function until all the motors reached their goals
+        '''
+        ids = self.dyn_chain.get_motors([1, 2, 3, 4, 5])
 
+        while True:
+            moving = False
+            for id in ids:
+                if self.dyn_chain.get_reg(reg, 'moving') != 0:
+                    moving = True
+                    break
+            if not moving:
+                break
+
+            sleep(0.1)
+
+    def set_tyro_manager_state(state):
+        self.tyro_manager.state = state
 
 
 def main_test_crochets():
