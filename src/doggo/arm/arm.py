@@ -2,6 +2,7 @@ from ik import ik
 from dxl.dxlchain import DxlChain
 from collections import namedtuple
 import math
+from threading import Thread
 import time
 import rpyc
 import pigpio
@@ -9,6 +10,39 @@ import pigpio
 USB_PORT = '/dev/ttyUSB0'
 
 Point = namedtuple('Point', ['x', 'y', 'z', 'r'])
+
+
+class TyroManager(Thread):
+    def __init__(self, chain, motor_id=8):
+        Thread.__init__(self)
+        self.state = "detendre"
+        self.running = True
+        self.chain = chain
+        self.motor_id = motor_id
+
+        chain.set_reg(self.motor_id, 'cw_angle_limit', 0)
+        chain.set_reg(self.motor_id, 'ccw_angle_limit', 0)
+
+    def run(self):
+        while self.running:
+            if self.state == "detendre":
+                self.detendre()
+            else:
+                self.tendre()
+
+            time.sleep(0.1)
+
+    def detendre(self):
+        load = chain.get_reg(motor_id, 'present_load')
+        direction = load >> 10
+        load = load % 1023
+
+        if load >= 9:
+            chain.set_reg(motor_id, 'moving_speed', 1023)
+            time.sleep(1)
+            chain.set_reg(motor_id, 'moving_speed', 0)
+            time.sleep(0.2)
+
 
 
 def map_to(value, istart, istop, ostart, ostop):
@@ -46,6 +80,9 @@ class Arm:
         self.opened = False
         self.pi = None
 
+        self.open()
+
+
     def open(self):
         self.pi = pigpio.pi()
         self.dyn_chain = DxlChain(self.port, rate=1000000)
@@ -55,6 +92,9 @@ class Arm:
 
         assert len(self.motors) == 6, 'Some arm motors are missing. Expected 6 instead got %d' % len(self.motors)
 
+        self.tyro_manager = TyroManager(self.dyn_chain)
+        self.tyro_manager.start()
+        
         self.opened = True
 
     def close(self):
@@ -209,6 +249,9 @@ class Arm:
         self.write_goal(*tyro, speed=50)
 
         self.dyn_chain.wait_stopped()
+
+    def wait_stopped(self):
+        self.dyn_chain.wait_stopped([1, 2, 3, 4, 5])
 
 
 
