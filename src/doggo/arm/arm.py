@@ -60,8 +60,9 @@ class TyroManager(Thread):
             self.moving = True
             self.chain.set_reg(self.motor_id, 'moving_speed', self.speed + 1024)
 
-        if abs(speed) <= 40:
+        if speed <= 40:
             self.state = 'manuel'
+            self.chain.set_reg(self.motor_id, 'moving_speed', 0)
 
 
 def map_to(value, istart, istop, ostart, ostop):
