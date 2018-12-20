@@ -13,6 +13,9 @@ Point = namedtuple('Point', ['x', 'y', 'z', 'r'])
 
 
 class TyroManager(Thread):
+    DETENDRE_SPEED = 636
+    TENDRE_SPEED = 600
+
     def __init__(self, chain, motor_id=8):
         Thread.__init__(self)
         self.state = 'detendre'
@@ -44,7 +47,7 @@ class TyroManager(Thread):
         load = load % 1023
 
         if load >= 10:
-            self.chain.set_reg(self.motor_id, 'moving_speed', self.speed)
+            self.chain.set_reg(self.motor_id, 'moving_speed', self.DETENDRE_SPEED)
             time.sleep(1)
 
             self.chain.set_reg(self.motor_id, 'moving_speed', 0)
@@ -59,12 +62,12 @@ class TyroManager(Thread):
         if not self.moving:
             self.start_time = time.time()
             self.moving = True
-            self.chain.set_reg(self.motor_id, 'moving_speed', self.speed + 1024)
+            self.chain.set_reg(self.motor_id, 'moving_speed', self.TENDRE_SPEED + 1024)
 
         if (time.time() - self.start_time) > 0.2 and speed <= 40:
             self.state = 'manuel'
             self.moving = False
-            self.chain.set_reg(self.motor_id, 'moving_speed', 0)
+d            self.chain.set_reg(self.motor_id, 'moving_speed', 0)
 
 
 def map_to(value, istart, istop, ostart, ostop):
