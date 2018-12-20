@@ -51,7 +51,9 @@ class TyroManager(Thread):
             time.sleep(0.2)
 
     def tendre(self):
-        speed = self.chain.get_reg(self.motor_id, 'present_speed') & 1023
+        speed = self.chain.get_reg(self.motor_id, 'present_speed')
+        direction = (speed >> 10) & 1
+        speed = speed & 1023
         speed = (2 * direction - 1) * speed * 0.111
 
         if not self.moving:
