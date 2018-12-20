@@ -93,8 +93,6 @@ class Arm:
         self.opened = False
         self.pi = None
 
-        self.open()
-
 
     def open(self):
         self.pi = pigpio.pi()
