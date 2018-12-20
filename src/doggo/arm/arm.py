@@ -262,7 +262,7 @@ class Arm:
 
             sleep(0.1)
 
-    def set_tyro_manager_state(state):
+    def set_tyro_manager_state(self, state):
         self.tyro_manager.state = state
 
 
