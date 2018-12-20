@@ -21,10 +21,11 @@ class TyroManager(Thread):
         self.motor_id = motor_id
         self.speed = 512
 
+
+    def run(self):
         self.chain.set_reg(self.motor_id, 'cw_angle_limit', 0)
         self.chain.set_reg(self.motor_id, 'ccw_angle_limit', 0)
 
-    def run(self):
         while self.running:
             if self.state == 'detendre':
                 self.detendre()

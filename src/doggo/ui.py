@@ -68,6 +68,16 @@ def keydown(e):
     if e.char == 'l':
         arm.write_goal(195, 415, 550, 193, speed=[50, 75, 50, 100])
 
+    if e.char == 'h':
+        print 'detetendre'
+        arm.set_tyro_manager_state('detendre')
+
+    if e.char == 'j':
+        print 'tendre'
+        arm.set_tyro_manager_state('tendre')
+
+
+
 
 def write_arm_rpc(y, z, r):
     if not y == arm_state['y'] or not z == arm_state['z']:
