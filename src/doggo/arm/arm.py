@@ -13,7 +13,7 @@ Point = namedtuple('Point', ['x', 'y', 'z', 'r'])
 
 
 class TyroManager(Thread):
-    DETENDRE_SPEED = 636
+    DETENDRE_SPEED = 700
     TENDRE_SPEED = 600
 
     def __init__(self, chain, motor_id=8):
