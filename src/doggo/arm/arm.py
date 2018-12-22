@@ -2,77 +2,22 @@ from ik import ik
 from dxl.dxlchain import DxlChain
 from collections import namedtuple
 import math
-from threading import Thread
 import time
 import rpyc
 import pigpio
+from utils import *
+from tyro_manager import TyroManager
 
 USB_PORT = '/dev/ttyUSB0'
 
 Point = namedtuple('Point', ['x', 'y', 'z', 'r'])
 
-
-class TyroManager(Thread):
-    DETENDRE_SPEED = 700
-    TENDRE_SPEED = 600
-
-    def __init__(self, chain, motor_id=8):
-        Thread.__init__(self)
-        self.state = 'detendre'
-        self.running = True
-        self.chain = chain
-        self.motor_id = motor_id
-        self.speed = 512
-        self.moving = False
-        self.start_time = 0
-
-
-    def run(self):
-        self.chain.set_reg(self.motor_id, 'cw_angle_limit', 0)
-        self.chain.set_reg(self.motor_id, 'ccw_angle_limit', 0)
-
-        while self.running:
-            if self.state == 'detendre':
-                self.detendre()
-            elif self.state == 'tendre':
-                self.tendre()
-            else:
-                pass
-
-            time.sleep(0.1)
-
-    def detendre(self):
-        load = self.chain.get_reg(self.motor_id, 'present_load')
-        direction = load >> 10
-        load = load % 1023
-
-        if load >= 10:
-            self.chain.set_reg(self.motor_id, 'moving_speed', self.DETENDRE_SPEED)
-            time.sleep(1)
-
-            self.chain.set_reg(self.motor_id, 'moving_speed', 0)
-            time.sleep(0.2)
-
-    def tendre(self):
-        speed = self.chain.get_reg(self.motor_id, 'present_speed')
-        direction = (speed >> 10) & 1
-        speed = speed & 1023
-        speed = (2 * direction - 1) * speed * 0.111
-
-        if not self.moving:
-            self.start_time = time.time()
-            self.moving = True
-            self.chain.set_reg(self.motor_id, 'moving_speed', self.TENDRE_SPEED + 1024)
-
-        if (time.time() - self.start_time) > 0.2 and speed <= 40:
-            self.state = 'manuel'
-            self.moving = False
-            self.chain.set_reg(self.motor_id, 'moving_speed', 0)
-
-
-def map_to(value, istart, istop, ostart, ostop):
-    return 1.0*ostart + (1.0*ostop - 1.0*ostart) * ((1.0*value - 1.0*istart) / (1.0*istop - 1.0*istart))
-
+MOTORS = {
+    1: {'min': 0, 'max': 915, 'mapping':   ((0, 180), (209, 868))},
+    2: {'min': 225, 'max': 878, 'mapping': ((5, 180), (225, 817))},
+    4: {'min': 159, 'max': 811, 'mapping': ((0, 180), (804, 192))},
+    5: {'min': 200, 'max': 800, 'mapping': ((-90, 90),( 200, 800))}
+}
 
 def motors_to_angles(goal1, goal23, goal4, goal5):
     '''
@@ -90,12 +35,12 @@ def angles_to_motors(a1, a23, a4, a5):
     '''
     Converts angles to motor positions
     '''
-    goal1 = map_to(a1, 0, 90, 826, 521)
+    goal1 = map_to(a1, *MOTORS[1]['mapping'][0] + MOTORS[1]['mapping'][1])
     goal23 = map_to(180 - a23, 10, 180, 227, 820)
-    goal4 = map_to(a4, 0, 180, 804, 192)
-    goal5 = map_to(a5, 90, -90, 213, 805)
+    goal4 = map_to(a4, *MOTORS[4]['mapping'][0] + MOTORS[4]['mapping'][1])
+    goal5 = map_to(a5, *MOTORS[5]['mapping'][0] + MOTORS[5]['mapping'][1])
 
-    return (goal1, goal23, goal4, goal5)
+    return map(int, [goal1, goal23, goal4, goal5])
 
 
 class Arm:
@@ -159,33 +104,25 @@ class Arm:
         '''
         Write goal positions of all servos with given speed
         '''
-        if not goal5 <= 200 and not goal5 >= 800:
-            if isinstance(speed, list):
-                s23, s4, s5 = speed
-                self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [s23, s23, s4, s5])
-            else:
-                self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [speed]*5)
+        goal23 = clamp(goal1, MOTORS[2]['min'], MOTORS[2]['max'])
+        goal4 = clamp(goal1, MOTORS[4]['min'], MOTORS[4]['max'])
+        goal5 = clamp(goal1, MOTORS[5]['min'], MOTORS[5]['max'])
 
-        elif goal5 <= 200:
-            goal5 = 200
-            if isinstance(speed, list):
-                s23, s4, s5 = speed
-                self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [s23, s23, s4, s5])
-            else:
-                self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [speed]*5)
-
-        elif goal5 >= 800:
-            goal5 = 800
-            if isinstance(speed, list):
-                s23, s4, s5 = speed
-                self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [s23, s23, s4, s5])
-            else:
-                self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [speed]*5)
+        if isinstance(speed, list):
+            s23, s4, s5 = speed
+            self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [s23, s23, s4, s5])
+        else:
+            self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [speed] * 5)
 
     def write_goal(self, goal1, goal23, goal4, goal5, speed=50):
         '''
         Write goal positions of all servos with given speed
         '''
+        goal1 = clamp(goal1, MOTORS[1]['min'], MOTORS[1]['max'])
+        goal23 = clamp(goal1, MOTORS[2]['min'], MOTORS[2]['max'])
+        goal4 = clamp(goal1, MOTORS[4]['min'], MOTORS[4]['max'])
+        goal5 = clamp(goal1, MOTORS[5]['min'], MOTORS[5]['max'])
+
         if isinstance(speed, list):
             s1, s23, s4, s5 = speed
             self.dyn_chain.sync_write_pos_speed([1, 2, 3, 4, 5], [goal1, goal23, 1023 - goal23, goal4, goal5], [s1, s23, s23, s4, s5])
@@ -206,9 +143,9 @@ class Arm:
         '''
 
         if direction == 1:
-            self.dyn_chain.goto(1, 0, speed=speed, blocking=False)
+            self.dyn_chain.goto(1, MOTORS[1]['min'], speed=speed, blocking=False)
         elif direction == -1:
-            self.dyn_chain.goto(1, 835, speed=speed, blocking=False)
+            self.dyn_chain.goto(1, MOTORS[1]['max'], speed=speed, blocking=False)
         else:
             self.dyn_chain.disable(1)
 
@@ -281,18 +218,15 @@ class Arm:
 def main_test_crochets():
 
     arm = Arm()
-    arm.open()
-
-
-    # arm.disable_all()
-
-    print arm.dyn_chain.get_motor_list(broadcast=False)
+    # arm.open()
+    # print arm.dyn_chain.get_motor_list(broadcast=False)
 
 
     # print arm.get_position()
 
+    print angles_to_motors(0, 10, 20, 0)
 
-    arm.close()
+    # arm.close()
 
 if __name__ == '__main__':
     main_test_crochets()

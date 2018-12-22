@@ -21,3 +21,16 @@ def sign(x):
         return 1
 
     return 0
+
+def map_to(value, istart, istop, ostart, ostop):
+    return 1.0*ostart + (1.0*ostop - 1.0*ostart) * ((1.0*value - 1.0*istart) / (1.0*istop - 1.0*istart))
+
+
+def clamp(value, lower, upper):
+    if value < lower:
+        return lower
+
+    if value > upper:
+        return upper
+
+    return value
