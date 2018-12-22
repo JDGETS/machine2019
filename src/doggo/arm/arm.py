@@ -205,7 +205,7 @@ class Arm:
         while True:
             moving = False
             for id in ids:
-                if self.dyn_chain.get_reg(id, 'is_moving') != 0:
+                if self.dyn_chain.get_reg(id, 'moving') != 0:
                     moving = True
                     break
             if not moving:
