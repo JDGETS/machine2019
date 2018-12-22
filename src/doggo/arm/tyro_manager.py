@@ -1,4 +1,5 @@
 from threading import Thread
+import time
 
 class TyroManager(Thread):
     DETENDRE_SPEED = 700
