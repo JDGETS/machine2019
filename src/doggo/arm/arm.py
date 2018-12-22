@@ -114,7 +114,7 @@ class Arm:
         if motor_id == 2:
             self.dyn_chain.sync_write_pos_speed([2, 3], [value, 1023 - value], [speed] * 2)
         else:
-            self.dyn_chain.sync_write_pos_speed(motor_id, [motor_id], [speed])
+            self.dyn_chain.sync_write_pos_speed([motor_id], [value], [speed])
 
     def write_goal(self, goal1, goal23, goal4, goal5, speed=50):
         '''
