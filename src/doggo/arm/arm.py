@@ -104,9 +104,9 @@ class Arm:
         '''
         Write goal positions of all servos with given speed
         '''
-        goal23 = clamp(goal1, MOTORS[2]['min'], MOTORS[2]['max'])
-        goal4 = clamp(goal1, MOTORS[4]['min'], MOTORS[4]['max'])
-        goal5 = clamp(goal1, MOTORS[5]['min'], MOTORS[5]['max'])
+        goal23 = clamp(goal23, MOTORS[2]['min'], MOTORS[2]['max'])
+        goal4 = clamp(goal4, MOTORS[4]['min'], MOTORS[4]['max'])
+        goal5 = clamp(goal5, MOTORS[5]['min'], MOTORS[5]['max'])
 
         if isinstance(speed, list):
             s23, s4, s5 = speed
@@ -119,9 +119,9 @@ class Arm:
         Write goal positions of all servos with given speed
         '''
         goal1 = clamp(goal1, MOTORS[1]['min'], MOTORS[1]['max'])
-        goal23 = clamp(goal1, MOTORS[2]['min'], MOTORS[2]['max'])
-        goal4 = clamp(goal1, MOTORS[4]['min'], MOTORS[4]['max'])
-        goal5 = clamp(goal1, MOTORS[5]['min'], MOTORS[5]['max'])
+        goal23 = clamp(goal23, MOTORS[2]['min'], MOTORS[2]['max'])
+        goal4 = clamp(goal4, MOTORS[4]['min'], MOTORS[4]['max'])
+        goal5 = clamp(goal5, MOTORS[5]['min'], MOTORS[5]['max'])
 
         if isinstance(speed, list):
             s1, s23, s4, s5 = speed
