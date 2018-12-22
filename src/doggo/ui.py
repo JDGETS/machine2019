@@ -1,8 +1,8 @@
 import config
 import pigpio
 import rpyc
-# import inputs
-# from inputs import get_gamepad
+import inputs
+from inputs import get_gamepad
 import time
 from Tkinter import *
 from threading import Thread
@@ -77,8 +77,6 @@ def keydown(e):
         arm.set_tyro_manager_state('tendre')
 
 
-
-
 def write_arm_rpc(y, z, r):
     if not y == arm_state['y'] or not z == arm_state['z']:
         arm_state['y'] = y
@@ -86,7 +84,7 @@ def write_arm_rpc(y, z, r):
         arm_state['r'] = r
 
         print ('move arm to y :', y, ' z : ', z, ' r :', r)
-        arm.goto2D(y, z, r)
+        #arm.goto2D(y, z, r)
 
 
 def write_pwm(pins, value):
@@ -107,7 +105,7 @@ def main():
     global arm, gpio, w, running
 
     ip = config.get_param('control_ip')
-    arm = rpyc.connect(ip, 18861).root
+    #arm = rpyc.connect(ip, 18861).root
     gpio = pigpio.pi(ip)
 
     master = Tk()
@@ -221,6 +219,50 @@ class gamepadloop(Thread):
                                 if 'down_z' in pad_keys:
                                     del pad_keys['down_z']
 
+                        elif event.code == 'ABS_HAT0X':
+                            if event.state == 1 and self.left_trigger:
+                                if 'rot_left' in pad_keys:
+                                    del pad_keys['rot_left']
+
+                                print 'rot right'
+
+                                pad_keys['rot_right'] = 1
+
+                            elif event.state == -1 and self.left_trigger:
+                                if 'rot_right' in pad_keys:
+                                    del pad_keys['rot_right']
+
+                                print 'rot left'
+
+                                pad_keys['rot_left'] = 1
+
+                            elif event.state == 0 and self.left_trigger:
+                                if 'rot_right' in pad_keys:
+                                    del pad_keys['rot_right']
+                                if 'rot_left' in pad_keys:
+                                    del pad_keys['rot_left']
+
+                        elif event.code == 'ABS_HAT0Y':
+                            if event.state == -1 and self.left_trigger:
+                                if 'wrist_down' in pad_keys:
+                                    del pad_keys['wrist_down']
+
+                                print 'wrist up'
+                                pad_keys['wrist_up'] = 1
+
+                            elif event.state == 1 and self.left_trigger:
+                                if 'wrist_up' in pad_keys:
+                                    del pad_keys['wrist_up']
+
+                                print 'wrist down'
+                                pad_keys['wrist_down'] = 1
+
+                            elif event.state == 0 and self.left_trigger:
+                                if 'wrist_up' in pad_keys:
+                                    del pad_keys['wrist_up']
+                                if 'wrist_down' in pad_keys:
+                                    del pad_keys['wrist_down']
+
                         # Si le right trigger est enfonce : controle du robot
                         if event.code == "ABS_RZ" and event.state == 255:
                             self.right_trigger = True
@@ -262,12 +304,14 @@ class gamepadloop(Thread):
                                 if 'left' in pad_keys:
                                     del pad_keys['left']
 
+                                print 'right'
                                 pad_keys['right'] = 1
 
                             elif event.state < -JOYSTICK_IGNORE_THRESHOLD and self.right_trigger:
                                 if 'right' in pad_keys:
                                     del pad_keys['right']
 
+                                print 'left'
                                 pad_keys['left'] = 1
 
                             else:
@@ -276,39 +320,27 @@ class gamepadloop(Thread):
                                 if 'right' in pad_keys:
                                     del pad_keys['right']
 
-                        elif event.code == 'ABS_HAT0X':
-                            if event.state == 1 and self.right_trigger:
-                                if 'rot_left' in pad_keys:
-                                    del pad_keys['rot_left']
-
-                                pad_keys['rot_right'] = 1
-
-                            elif event.state == -1 and self.right_trigger:
-                                if 'rot_right' in pad_keys:
-                                    del pad_keys['rot_right']
-
-                                pad_keys['rot_left'] = 1
-
-                            elif event.state == 0 and self.right_trigger:
-                                del pad_keys['rot_right']
-                                del pad_keys['rot_left']
-
+                        # Tendre et detendre la tyrolienne
                         elif event.code == 'ABS_HAT0Y':
                             if event.state == 1 and self.right_trigger:
-                                if 'wrist_down' in pad_keys:
-                                    del pad_keys['wrist_down']
+                                if 'tendre_tyro' in pad_keys:
+                                    del pad_keys['tendre_tyro']
 
-                                pad_keys['wrist_up'] = 1
+                                print 'detendre'
+                                pad_keys['detendre_tyro'] = 1
 
                             elif event.state == -1 and self.right_trigger:
-                                if 'wrist_up' in pad_keys:
-                                    del pad_keys['wrist_up']
+                                if 'detendre_tyro' in pad_keys:
+                                    del pad_keys['detendre_tyro']
 
-                                pad_keys['wrist_down'] = 1
+                                print 'tendre'
+                                pad_keys['tendre_tyro'] = 1
 
                             elif event.state == 0 and self.right_trigger:
-                                del pad_keys['wrist_down']
-                                del pad_keys['wrist_up']
+                                if 'detendre_tyro' in pad_keys:
+                                    del pad_keys['detendre_tyro']
+                                if 'tendre_tyro' in pad_keys:
+                                    del pad_keys['tendre_tyro']
 
 
 class gpioloop(Thread):
@@ -378,6 +410,12 @@ class gpioloop(Thread):
                 self.state = 'arm_wrist_down'
                 arm_r -= arm_wrist_angle_step
 
+            elif 'tendre_tyro' in pad_keys:
+                arm.set_tyro_manager_state('tendre')
+
+            elif 'detendre_tyro' in pad_keys:  # Todo : max arm angle
+                arm.set_tyro_manager_state('detendre')
+
             else:
                 self.state = 'stop'
                 self.motor_left_target_speed = 0
@@ -395,19 +433,19 @@ class gpioloop(Thread):
             self.motor_left_actual_speed = self.motor_left_target_speed
             self.motor_right_actual_speed = self.motor_right_target_speed
 
-            if self.motor_left_actual_speed < 0:
-                write_pwm([config.doggo_motor_left_back_channel], abs(self.motor_left_actual_speed))
-                write_pwm([config.doggo_motor_left_for_channel], 0)
-            else:
-                write_pwm([config.doggo_motor_left_for_channel], self.motor_left_actual_speed)
-                write_pwm([config.doggo_motor_left_back_channel], 0)
-
-            if self.motor_right_actual_speed < 0:
-                write_pwm([config.doggo_motor_right_back_channel], abs(self.motor_right_actual_speed))
-                write_pwm([config.doggo_motor_right_for_channel], 0)
-            else:
-                write_pwm([config.doggo_motor_right_for_channel], self.motor_right_actual_speed)
-                write_pwm([config.doggo_motor_right_back_channel], 0)
+            # if self.motor_left_actual_speed < 0:
+            #     write_pwm([config.doggo_motor_left_back_channel], abs(self.motor_left_actual_speed))
+            #     write_pwm([config.doggo_motor_left_for_channel], 0)
+            # else:
+            #     write_pwm([config.doggo_motor_left_for_channel], self.motor_left_actual_speed)
+            #     write_pwm([config.doggo_motor_left_back_channel], 0)
+            #
+            # if self.motor_right_actual_speed < 0:
+            #     write_pwm([config.doggo_motor_right_back_channel], abs(self.motor_right_actual_speed))
+            #     write_pwm([config.doggo_motor_right_for_channel], 0)
+            # else:
+            #     write_pwm([config.doggo_motor_right_for_channel], self.motor_right_actual_speed)
+            #     write_pwm([config.doggo_motor_right_back_channel], 0)
 
             if 'o' in keys or 'rot_right' in pad_keys:
                 self.set_base_direction(1)
