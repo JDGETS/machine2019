@@ -111,20 +111,22 @@ class ArmManuelState(State):
 class ArmPickupState(State):
     def update(self, state_manager):
         # simba
-        state_manager.arm.write_goal_without_base(225, 483, 191)
+        state_manager.arm.write_goal_without_base(225, 483, 191, speed=150)
         state_manager.wait_stopped()
 
         # rotate base
-        state_manager.arm.write_single_goal(1, 573)
+        state_manager.arm.write_single_goal(1, 616, speed=250)
         state_manager.wait_stopped()
 
         # place le bonhomme
-        state_manager.arm.write_goal(558, 422, 567, 196)
+        state_manager.arm.write_goal(616, 421, 560, 198, speed=100)
         state_manager.wait_stopped()
 
         # rotate a bit
-        state_manager.arm.write_single_goal(1, 507)
+        state_manager.arm.write_single_goal(1, 495, speed=150)
         state_manager.wait_stopped()
 
         # switch to manual
         state_manager.stop()
+
+
