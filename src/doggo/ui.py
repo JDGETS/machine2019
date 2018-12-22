@@ -28,8 +28,8 @@ backwards_mov_speed = 150
 rotation_speed = 150
 
 # Arm mov increments
-arm_step = 2
-arm_wrist_angle_step = 10
+arm_step = 5
+arm_wrist_angle_step = 2
 
 
 def set_grip(state):
@@ -47,7 +47,7 @@ def keydown(e):
 
     keys[e.char] = 1
 
-    if e.char == 'g':
+    if e.char == 'q':
         global grip_state
         grip_state = not grip_state
         set_grip(grip_state)
@@ -56,35 +56,24 @@ def keydown(e):
         arm.disable_all()
         print arm.get_position()
 
-    if e.char == 'b':
-        arm.write_goal(605, 408, 772, 415)
-
-    if e.char == 'n':
-        arm.write_goal(605, 483, 771, 436)
-
-    if e.char == 'm':
-        arm.write_goal(469, 768, 341, 301, speed=[50, 50, 100, 50])
-
-    if e.char == 'l':
-        arm.write_goal(195, 415, 550, 193, speed=[50, 75, 50, 100])
-
-    if e.char == 'h':
+    if e.char == 'x':
         print 'detetendre'
         arm.set_tyro_manager_state('detendre')
 
-    if e.char == 'j':
+    if e.char == 'z':
         print 'tendre'
         arm.set_tyro_manager_state('tendre')
 
 
 def write_arm_rpc(y, z, r):
-    if not y == arm_state['y'] or not z == arm_state['z']:
+    if not y == arm_state['y'] or not z == arm_state['z'] or r != arm_state['r']:
         arm_state['y'] = y
         arm_state['z'] = z
         arm_state['r'] = r
 
         print ('move arm to y :', y, ' z : ', z, ' r :', r)
-        #arm.goto2D(y, z, r)
+
+        arm.goto2D(y, z, r, speed=100)
 
 
 def write_pwm(pins, value):
@@ -105,7 +94,7 @@ def main():
     global arm, gpio, w, running
 
     ip = config.get_param('control_ip')
-    #arm = rpyc.connect(ip, 18861).root
+    arm = rpyc.connect(ip, 18861).root
     gpio = pigpio.pi(ip)
 
     master = Tk()
@@ -146,6 +135,8 @@ class gamepadloop(Thread):
                 events = get_gamepad()
             except inputs.UnpluggedError:
                 print("Pas de manette connectee")
+                break
+
 
             for event in events:
 
@@ -367,59 +358,49 @@ class gpioloop(Thread):
             arm_r = arm_state['r']
 
             if 'w' in keys or 'forward' in pad_keys:
-                self.state = 'forward'
                 self.motor_left_target_speed = forward_mov_speed
                 self.motor_right_target_speed = forward_mov_speed
 
             elif 's' in keys or 'backward' in pad_keys:
-                self.state = 'backward'
                 self.motor_left_target_speed = -backwards_mov_speed
                 self.motor_right_target_speed = -backwards_mov_speed
 
             elif 'd' in keys or 'right' in pad_keys:
-                self.state = 'right'
                 self.motor_left_target_speed = rotation_speed
                 self.motor_right_target_speed = -rotation_speed
 
             elif 'a' in keys or 'left' in pad_keys:
-                self.state = 'left'
                 self.motor_left_target_speed = -rotation_speed
                 self.motor_right_target_speed = rotation_speed
+            else:
+                self.motor_left_target_speed = 0
+                self.motor_right_target_speed = 0
 
-            elif 'for_y' in pad_keys:
-                self.state = 'arm_forward'
+
+            if 'for_y' in pad_keys or 't' in keys:
                 arm_y += arm_step
 
-            elif 'back_y' in pad_keys:
-                self.state = 'arm_backwards'
+            elif 'back_y' in pad_keys or 'g' in keys:
                 arm_y -= arm_step
 
-            elif 'up_z' in pad_keys:
-                self.state = 'arm_up'
+            elif 'up_z' in pad_keys or 'y' in keys:
                 arm_z += arm_step
 
-            elif 'down_z' in pad_keys:
-                self.state = 'arm_down'
+            elif 'down_z' in pad_keys or 'h' in keys:
                 arm_z -= arm_step
 
-            elif 'wrist_up' in pad_keys:  # Todo : max arm angle
-                self.state = 'arm_wrist_up'
+            elif 'wrist_up' in pad_keys or 'u' in keys:
                 arm_r += arm_wrist_angle_step
 
-            elif 'wrist_down' in pad_keys:  # Todo : max arm angle
-                self.state = 'arm_wrist_down'
+            elif 'wrist_down' in pad_keys or 'j' in keys:
                 arm_r -= arm_wrist_angle_step
 
             elif 'tendre_tyro' in pad_keys:
                 arm.set_tyro_manager_state('tendre')
 
-            elif 'detendre_tyro' in pad_keys:  # Todo : max arm angle
+            elif 'detendre_tyro' in pad_keys:
                 arm.set_tyro_manager_state('detendre')
 
-            else:
-                self.state = 'stop'
-                self.motor_left_target_speed = 0
-                self.motor_right_target_speed = 0
 
             write_arm_rpc(arm_y, arm_z, arm_r)
 
@@ -433,19 +414,19 @@ class gpioloop(Thread):
             self.motor_left_actual_speed = self.motor_left_target_speed
             self.motor_right_actual_speed = self.motor_right_target_speed
 
-            # if self.motor_left_actual_speed < 0:
-            #     write_pwm([config.doggo_motor_left_back_channel], abs(self.motor_left_actual_speed))
-            #     write_pwm([config.doggo_motor_left_for_channel], 0)
-            # else:
-            #     write_pwm([config.doggo_motor_left_for_channel], self.motor_left_actual_speed)
-            #     write_pwm([config.doggo_motor_left_back_channel], 0)
-            #
-            # if self.motor_right_actual_speed < 0:
-            #     write_pwm([config.doggo_motor_right_back_channel], abs(self.motor_right_actual_speed))
-            #     write_pwm([config.doggo_motor_right_for_channel], 0)
-            # else:
-            #     write_pwm([config.doggo_motor_right_for_channel], self.motor_right_actual_speed)
-            #     write_pwm([config.doggo_motor_right_back_channel], 0)
+            if self.motor_left_actual_speed < 0:
+                write_pwm([config.doggo_motor_left_back_channel], abs(self.motor_left_actual_speed))
+                write_pwm([config.doggo_motor_left_for_channel], 0)
+            else:
+                write_pwm([config.doggo_motor_left_for_channel], self.motor_left_actual_speed)
+                write_pwm([config.doggo_motor_left_back_channel], 0)
+
+            if self.motor_right_actual_speed < 0:
+                write_pwm([config.doggo_motor_right_back_channel], abs(self.motor_right_actual_speed))
+                write_pwm([config.doggo_motor_right_for_channel], 0)
+            else:
+                write_pwm([config.doggo_motor_right_for_channel], self.motor_right_actual_speed)
+                write_pwm([config.doggo_motor_right_back_channel], 0)
 
             if 'o' in keys or 'rot_right' in pad_keys:
                 self.set_base_direction(1)
@@ -458,7 +439,7 @@ class gpioloop(Thread):
 
     def set_base_direction(self, direction):
         if self.base_direction != direction:
-            arm.move_base(direction)
+            arm.move_base(direction, speed=100)
             self.base_direction = direction
 
 
