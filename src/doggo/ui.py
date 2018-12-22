@@ -7,10 +7,12 @@ import time
 from Tkinter import *
 from threading import Thread
 from utils import sign
+from arm.state_manager import *
 
 arm = None
 gpio = None
 w = None
+sm = None
 
 running = True
 label_vars = {}
@@ -56,6 +58,11 @@ def keydown(e):
         arm.disable_all()
         print arm.get_position()
 
+    if e.char == 'c':
+        print 'pickup'
+        sm.set_state(ArmPickupState())
+
+
     if e.char == 'x':
         print 'detetendre'
         arm.set_tyro_manager_state('detendre')
@@ -91,7 +98,7 @@ def keyup(e):
 
 
 def main():
-    global arm, gpio, w, running
+    global arm, gpio, w, running, sm
 
     ip = config.get_param('control_ip')
     arm = rpyc.connect(ip, 18861).root
@@ -111,12 +118,19 @@ def main():
     t1 = gamepadloop()
     t1.start()
 
+    sm = ArmStateManager(arm, keys)
+    sm.start()
+
+
+
     mainloop()
 
+    sm.running = False
     running = False
 
     t.join()
     t1.join()
+    sm.join()
 
 
 class gamepadloop(Thread):

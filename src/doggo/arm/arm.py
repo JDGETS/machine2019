@@ -7,6 +7,7 @@ import rpyc
 import pigpio
 from utils import *
 from tyro_manager import TyroManager
+import positions
 
 USB_PORT = '/dev/ttyUSB0'
 
@@ -69,11 +70,6 @@ class Arm:
         self.opened = False
         self.dyn_chain.close()
 
-    def release(self):
-        self.pi.set_PWM_dutycycle(22, 120)
-        time.sleep(0.5)
-        self.pi.set_PWM_dutycycle(22, 0)
-
     def goto2D(self, y, z, r, speed=50):
         '''
         Uses inverse kinematic to go to a position in planar space (only y and z)
@@ -113,6 +109,12 @@ class Arm:
             self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [s23, s23, s4, s5])
         else:
             self.dyn_chain.sync_write_pos_speed([2, 3, 4, 5], [goal23, 1023 - goal23, goal4, goal5], [speed] * 5)
+
+    def write_single_goal(self, motor_id, value, speed=50):
+        if motor_id == 2:
+            self.dyn_chain.sync_write_pos_speed([2, 3], [value, 1023 - value], [speed] * 2)
+        else:
+            self.dyn_chain.sync_write_pos_speed(motor_id, [motor_id], [speed])
 
     def write_goal(self, goal1, goal23, goal4, goal5, speed=50):
         '''
@@ -203,7 +205,7 @@ class Arm:
         while True:
             moving = False
             for id in ids:
-                if self.dyn_chain.get_reg(reg, 'moving') != 0:
+                if self.dyn_chain.get_reg(id, 'is_moving') != 0:
                     moving = True
                     break
             if not moving:
