@@ -10,3 +10,8 @@ if sys.argv[1] == 'doggo':
 elif sys.argv[1] == 'pupper':
     import pupper
     pupper.main()
+
+elif sys.argv[1] == 'rpyc':
+    import doggo.arm.arm_service
+
+    doggo.arm.arm_service.main()

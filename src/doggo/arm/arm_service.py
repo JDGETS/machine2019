@@ -10,9 +10,12 @@ class ArmService(rpyc.Service):
         return getattr(ARM, name)
 
 
-if __name__ == '__main__':
+def main():
     ARM.open()
 
     RPC_PORT = 18861
     t = ThreadedServer(ArmService, port=RPC_PORT)
     t.start()
+
+if __name__ == '__main__':
+    main()
