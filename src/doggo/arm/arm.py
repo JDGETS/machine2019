@@ -7,7 +7,7 @@ import rpyc
 import pigpio
 from utils import *
 from tyro_manager import TyroManager
-import positions
+
 
 USB_PORT = '/dev/ttyUSB0'
 
