@@ -16,7 +16,7 @@ MOTORS = {
     1: {'min': 0, 'max': 915, 'mapping':   ((0, 180), (209, 868))},
     2: {'min': 225, 'max': 878, 'mapping': ((5, 180), (225, 817))},
     4: {'min': 159, 'max': 811, 'mapping': ((0, 180), (804, 192))},
-    5: {'min': 200, 'max': 800, 'mapping': ((-90, 90),( 200, 800))}
+    5: {'min': 200, 'max': 800, 'mapping': ((-90, 90),(800, 200))}
 }
 
 def motors_to_angles(goal1, goal23, goal4, goal5):
