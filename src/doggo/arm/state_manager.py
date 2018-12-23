@@ -33,6 +33,7 @@ class StateManager(Thread):
         self.stop_event = Event()
 
     def stop(self):
+
         self.current_state = None
 
     def run(self):
@@ -62,6 +63,7 @@ class StateManager(Thread):
 
     def set_state(self, state):
         self.stop_event.clear()
+        print 'start state = ' + str(state)
         self.current_state = state
 
 
@@ -72,6 +74,8 @@ class ArmStateManager(StateManager):
         self.arm = arm
 
     def stop(self):
+        print 'stop state = ' + str(self.current_state)
+
         self.arm.stop_movement()
         self.current_state = None
 
@@ -140,6 +144,45 @@ class ArmReleaseState(State):
 
         state_manager.arm.write_single_goal(2, 283, speed=100)
 
+        state_manager.wait_stopped()
+
+        state_manager.stop()
+
+
+class PickupCrochetState(State):
+    def __init__(self, number):
+        State.__init__(self)
+        self.number = number
+        self.crochets = {
+            1: [(928, 433, 768, 433), (928, 478, 777, 451)],
+            2: [(871, 412, 784, 424), (871, 460, 794, 461)]
+        }
+
+    def update(self, state_manager):
+        state_manager.gpio.set_servo_pulsewidth(config.doggo_servo_arm_grip_channel, 1500)
+        time.sleep(0.5)
+        state_manager.gpio.set_servo_pulsewidth(config.doggo_servo_arm_grip_channel, 0)
+
+        before, target = self.crochets[self.number]
+
+        # home
+        state_manager.arm.goto2D(85, 200, -18, speed=150)
+        state_manager.wait_stopped()
+
+        state_manager.arm.write_single_goal(1, before[0], speed=250)
+        state_manager.wait_stopped()
+
+        state_manager.arm.write_goal(*before)
+        state_manager.wait_stopped()
+
+        state_manager.arm.write_goal(*target)
+        state_manager.wait_stopped()
+
+        state_manager.gpio.set_servo_pulsewidth(config.doggo_servo_arm_grip_channel, 1200)
+        time.sleep(0.5)
+        state_manager.gpio.set_servo_pulsewidth(config.doggo_servo_arm_grip_channel, 0)
+
+        state_manager.arm.write_goal(*before)
         state_manager.wait_stopped()
 
         state_manager.stop()

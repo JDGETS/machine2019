@@ -13,6 +13,7 @@ arm = None
 gpio = None
 w = None
 sm = None
+master = None
 
 running = True
 label_vars = {}
@@ -25,7 +26,7 @@ grip_state = True
 JOYSTICK_IGNORE_THRESHOLD = 32000
 
 # Robot moving speed
-forward_mov_speed = 180
+forward_mov_speed = 150
 backwards_mov_speed = 150
 rotation_speed = 150
 
@@ -41,7 +42,7 @@ def set_grip(state):
     else:
         gpio.set_servo_pulsewidth(22, 1200)
 
-    w.after(500, lambda: gpio.set_servo_pulsewidth(22, 0))
+    master.after(500, lambda: gpio.set_servo_pulsewidth(22, 0))
 
 
 def keydown(e):
@@ -61,11 +62,9 @@ def keydown(e):
 
     if e.char == 'c':
         print 'pickup'
-        sm.set_state(ArmPickupState())
+
     if e.char == 'v':
         print 'release'
-        sm.set_state(ArmReleaseState())
-
 
     if e.char == 'x':
         print 'detetendre'
@@ -101,8 +100,29 @@ def keyup(e):
         del keys[e.char]
 
 
+def handle_apporter_tyro():
+    sm.set_state(ArmPickupState())
+
+
+def handle_lacher():
+    sm.set_state(ArmReleaseState())
+
+
+def handle_home():
+    sm.stop()
+
+    write_arm_rpc(85, 200, -18)
+
+
+def handle_crochet(number):
+    def handler():
+        sm.set_state(PickupCrochetState(number))
+
+    return handler
+
+
 def main():
-    global arm, gpio, w, running, sm
+    global arm, gpio, master, running, sm
 
     ip = config.get_param('control_ip')
     arm = rpyc.connect(ip, 18861).root
@@ -110,8 +130,20 @@ def main():
 
     master = Tk()
 
-    w = Canvas(master, width=500, height=500)
-    w.pack()
+    # w = Canvas(master, width=500, height=500)
+    # w.pack()
+
+    Label(master, text="MOUVEMENTS", bg="BLACK", fg="white").grid(row=1, column=0)
+
+    Button(master, text="Home", command=handle_home).grid(row=2, column=0)
+    Button(master, text="Apporter a tyrolienne", command=handle_apporter_tyro).grid(row=2, column=1)
+    Button(master, text="Lacher", command=handle_lacher).grid(row=2, column=2)
+
+    Label(master, text="CROCHETS", bg="BLACK", fg="white").grid(row=3, column=0)
+    for i in range(4):
+        Button(master, width=10, text=str(1 + i), command=handle_crochet(i + 1)).grid(row=4 + i, column=0)
+        Button(master, width=10, text=str(i + 4 + 1), command=handle_crochet(i + 1 + 4)).grid(row=4 + i, column=1)
+
 
     master.bind("<KeyPress>", keydown)
     master.bind("<KeyRelease>", keyup)
