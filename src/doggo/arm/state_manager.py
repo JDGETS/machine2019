@@ -1,5 +1,6 @@
 from threading import Thread, Event
 import time
+import config
 
 
 class StateStop(Exception):
@@ -20,12 +21,13 @@ class KeyBouncer:
 
 
 class StateManager(Thread):
-    def __init__(self, keys):
+    def __init__(self, keys, gpio):
         '''
         keys :: dict(string => int) # Keys currently pressed
         '''
         Thread.__init__(self)
         self.keys = keys
+        self.gpio = gpio
         self.running = True
         self.current_state = None
         self.stop_event = Event()
@@ -64,8 +66,8 @@ class StateManager(Thread):
 
 
 class ArmStateManager(StateManager):
-    def __init__(self, arm, keys):
-        StateManager.__init__(self, keys)
+    def __init__(self, arm, keys, gpio):
+        StateManager.__init__(self, keys, gpio)
 
         self.arm = arm
 
@@ -130,3 +132,14 @@ class ArmPickupState(State):
         state_manager.stop()
 
 
+class ArmReleaseState(State):
+    def update(self, state_manager):
+        state_manager.gpio.set_servo_pulsewidth(config.doggo_servo_arm_grip_channel, 1500)
+        time.sleep(0.5)
+        state_manager.gpio.set_servo_pulsewidth(config.doggo_servo_arm_grip_channel, 0)
+
+        state_manager.arm.write_single_goal(2, 283, speed=100)
+
+        state_manager.wait_stopped()
+
+        state_manager.stop()

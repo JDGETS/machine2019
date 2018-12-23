@@ -35,6 +35,7 @@ arm_wrist_angle_step = 2
 
 
 def set_grip(state):
+    print 'grip state = ' + str(state)
     if state:
         gpio.set_servo_pulsewidth(22, 1500)
     else:
@@ -61,6 +62,9 @@ def keydown(e):
     if e.char == 'c':
         print 'pickup'
         sm.set_state(ArmPickupState())
+    if e.char == 'v':
+        print 'release'
+        sm.set_state(ArmReleaseState())
 
 
     if e.char == 'x':
@@ -118,10 +122,8 @@ def main():
     t1 = gamepadloop()
     t1.start()
 
-    sm = ArmStateManager(arm, keys)
+    sm = ArmStateManager(arm, keys, gpio)
     sm.start()
-
-
 
     mainloop()
 
