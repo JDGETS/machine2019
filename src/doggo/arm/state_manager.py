@@ -70,7 +70,7 @@ class StateManager(Thread):
 class ArmStateManager(StateManager):
     def __init__(self, arm, keys, gpio):
         StateManager.__init__(self, keys, gpio)
-
+        self.set_state(ArmManuelState())
         self.arm = arm
 
     def stop(self):
@@ -95,15 +95,74 @@ class State:
 
 
 class ArmManuelState(State):
+    ARM_STEP = 10
+    ARM_WRIST_STEP = 5
+
     def __init__(self):
         State.__init__(self)
         self.current_position = [0, 200, 200, 0]
+        self.state_manager = None
+        self.base_direction = 0
+        self.position_2d = [200, 200, 0]
+        self.frame = 0
+        self.last_update = -10
 
-    def update(self):
-        if 't' in self.state_manager.keys:
-            new_position = self.current_position[:]
-            new_position[2] += 20
-            self.write_goal(new_position)
+
+    def update(self, state_manager):
+        self.state_manager = state_manager
+
+        keys = state_manager.keys
+        ay, az, ar = self.position_2d
+
+        if 'o' in keys:
+            self.set_base_direction(1)
+        elif 'i' in keys:
+            self.set_base_direction(-1)
+        else:
+            self.set_base_direction(0)
+
+
+        if self.frame - self.last_update > 3:
+            if 't' in keys:
+                ay += self.ARM_STEP
+            elif 'g' in keys:
+                ay -= self.ARM_STEP
+
+            if 'y' in keys:
+                az += self.ARM_STEP
+            elif 'h' in keys:
+                az -= self.ARM_STEP
+
+            if 'u' in keys:
+                ar += self.ARM_WRIST_STEP
+            elif 'j' in keys:
+                ar -= self.ARM_WRIST_STEP
+
+            self.write_2d([ay, az, ar])
+
+        self.frame += 1
+
+        self.state_manager.sleep(0.02)
+
+    def write_2d(self, pos):
+        if self.position_2d != pos:
+            self.position_2d = pos
+            print 'arm = ' + str(pos)
+            self.last_update = self.frame
+
+            self.state_manager.arm.goto2D(pos[0], pos[1], pos[2], speed=75)
+
+
+    def set_base_direction(self, direction):
+        if self.base_direction != direction:
+            self.state_manager.arm.move_base(direction, speed=100)
+            self.base_direction = direction
+
+            # ask to stop base move
+            if direction == 0:
+                # get current position?
+                pass
+
 
     def write_goal(self, position):
         if self.current_position != position:

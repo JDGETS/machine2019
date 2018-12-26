@@ -81,9 +81,8 @@ def write_arm_rpc(y, z, r):
         arm_state['z'] = z
         arm_state['r'] = r
 
-        print ('move arm to y :', y, ' z : ', z, ' r :', r)
-
-        arm.goto2D(y, z, r, speed=100)
+        # print ('move arm to y :', y, ' z : ', z, ' r :', r)
+        # arm.goto2D(y, z, r, speed=100)
 
 
 def write_pwm(pins, value):
@@ -476,19 +475,8 @@ class gpioloop(Thread):
                 write_pwm([config.doggo_motor_right_for_channel], self.motor_right_actual_speed)
                 write_pwm([config.doggo_motor_right_back_channel], 0)
 
-            if 'o' in keys or 'rot_right' in pad_keys:
-                self.set_base_direction(1)
-            elif 'i' in keys or 'rot_left' in pad_keys:
-                self.set_base_direction(-1)
-            else:
-                self.set_base_direction(0)
 
             time.sleep(1/60.0)
-
-    def set_base_direction(self, direction):
-        if self.base_direction != direction:
-            arm.move_base(direction, speed=100)
-            self.base_direction = direction
 
 
 if __name__ == '__main__':
