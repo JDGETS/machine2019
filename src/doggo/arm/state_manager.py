@@ -95,13 +95,13 @@ class State:
 class ArmManuelState(State):
     ARM_STEP = 10
     ARM_WRIST_STEP = 5
-    HOME = (85, 200, -18)
+    HOME = [85, 230, -18]
 
     def __init__(self):
         State.__init__(self)
         self.state_manager = None
         self.base_direction = 0
-        self.position_2d = [200, 200, 0]
+        self.position_2d = self.HOME
         self.frame = 0
         self.last_update = -10
 
@@ -150,7 +150,6 @@ class ArmManuelState(State):
 
             self.state_manager.arm.goto2D(pos[0], pos[1], pos[2], speed=100)
 
-
     def set_base_direction(self, direction):
         if self.base_direction != direction:
             self.state_manager.arm.move_base(direction, speed=100)
@@ -161,11 +160,29 @@ class ArmManuelState(State):
                 # get current position?
                 pass
 
+    def set_position(self, pos):
+        pass
+
+
+class ArmFirstHuman(State):
+    # just to note pos of arm for saving first dude
+    arm = [315, -70, -318]
+
+
+class ArmHomeState(State):
+    def update(self, state_manager):
+
+        # home
+        state_manager.arm.goto2D(85, 230, -18, speed=150)
+        state_manager.wait_stopped()
+
+        state_manager.arm.stop()
+
 
 class ArmPickupState(State):
     def update(self, state_manager):
         # simba
-        state_manager.arm.write_goal_without_base(225, 483, 191, speed=150)
+        state_manager.arm.write_goal_without_base(225, 483, 191, speed=100)
         state_manager.wait_stopped()
 
         # rotate base

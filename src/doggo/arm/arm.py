@@ -216,6 +216,21 @@ class Arm:
     def set_tyro_manager_state(self, state):
         self.tyro_manager.state = state
 
+    def get_chain_info(self):
+
+        dyn_infos = {}
+
+        for i in [1, 2, 3, 4, 5]:
+            motor = {
+                'temp': self.dyn_chain.get_reg_si(i, 'present_temp'),
+                'voltage': self.dyn_chain.get_reg_si(i, 'present_voltage'),
+                'present_pos': self.dyn_chain.get_reg_si(i, 'present_position')
+            }
+
+            dyn_infos['motor' + str(i)] = motor
+
+        return dyn_infos
+
 
 def main_test_crochets():
 
@@ -229,6 +244,7 @@ def main_test_crochets():
     print angles_to_motors(0, 10, 20, 0)
 
     # arm.close()
+
 
 if __name__ == '__main__':
     main_test_crochets()

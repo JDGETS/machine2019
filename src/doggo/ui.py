@@ -20,8 +20,8 @@ label_vars = {}
 keys = {}
 pad_keys = {}
 states = {}
-# arm_state = {'y': 200, 'z': 200, 'r': 0}  # Start position
 grip_state = True
+speed_mode = False
 
 JOYSTICK_IGNORE_THRESHOLD = 32000
 
@@ -33,6 +33,19 @@ rotation_speed = 150
 # Arm mov increments
 arm_step = 5
 arm_wrist_angle_step = 2
+
+
+def change_speed(state):
+    print 'speed mode = ' + str(state)
+    if state:
+        global forward_mov_speed
+        forward_mov_speed = 230
+
+        global backwards_mov_speed
+        backwards_mov_speed = 230
+    else:
+        forward_mov_speed = 150
+        backwards_mov_speed = 150
 
 
 def set_grip(state):
@@ -102,7 +115,8 @@ def handle_stop():
 
 
 def handle_home():
-    sm.stop()
+    sm.set_state(ArmHomeState())
+
 
 def handle_crochet(number):
     def handler():
@@ -135,6 +149,9 @@ def main():
         Button(master, width=10, text=str(1 + i), command=handle_crochet(i + 1)).grid(row=4 + i, column=0)
         Button(master, width=10, text=str(i + 4 + 1), command=handle_crochet(i + 1 + 4)).grid(row=4 + i, column=1)
 
+    Label(master, text="Temps", bg="BLACK", fg="white").grid(row=5, column=0)
+    Label(master, text="CROCHETS", bg="BLACK", fg="white").grid(row=6, column=0)
+    Label(master, text="CROCHETS", bg="BLACK", fg="white").grid(row=7, column=0)
 
     master.bind("<KeyPress>", keydown)
     master.bind("<KeyRelease>", keyup)
@@ -195,6 +212,12 @@ class gamepadloop(Thread):
                         # Bouton B : mode detendre la tyro lorsque tension
                         if event.code == 'BTN_EAST' and event.state == 1:
                             arm.set_tyro_manager_state('detendre')
+
+                        # Bouton X : mode plus vite
+                        if event.code == 'BTN_NORTH' and event.state == 1:
+                            global speed_mode
+                            speed_mode = not speed_mode
+                            change_speed(speed_mode)
 
                         if event.code == "BTN_TR" and self.left_trigger:
 
