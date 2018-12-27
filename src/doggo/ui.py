@@ -20,7 +20,7 @@ label_vars = {}
 keys = {}
 pad_keys = {}
 states = {}
-arm_state = {'y': 200, 'z': 200, 'r': 0}  # Start position
+# arm_state = {'y': 200, 'z': 200, 'r': 0}  # Start position
 grip_state = True
 
 JOYSTICK_IGNORE_THRESHOLD = 32000
@@ -75,14 +75,14 @@ def keydown(e):
         arm.set_tyro_manager_state('tendre')
 
 
-def write_arm_rpc(y, z, r):
-    if not y == arm_state['y'] or not z == arm_state['z'] or r != arm_state['r']:
-        arm_state['y'] = y
-        arm_state['z'] = z
-        arm_state['r'] = r
-
-        # print ('move arm to y :', y, ' z : ', z, ' r :', r)
-        # arm.goto2D(y, z, r, speed=100)
+# def write_arm_rpc(y, z, r):
+#     if not y == arm_state['y'] or not z == arm_state['z'] or r != arm_state['r']:
+#         arm_state['y'] = y
+#         arm_state['z'] = z
+#         arm_state['r'] = r
+#
+#         # print ('move arm to y :', y, ' z : ', z, ' r :', r)
+#         # arm.goto2D(y, z, r, speed=100)
 
 
 def write_pwm(pins, value):
@@ -200,106 +200,110 @@ class gamepadloop(Thread):
                     # Controle du mouvement avec joysticks et trigger
                     if event.ev_type == "Absolute":
 
-                        # Si le left trigger est enfonce : controle du bras
+                        # Si le left trigger est enfonce : controle du bras, utilisation du
+                        # dictionnaire keys pour le state_manager
                         if event.code == "ABS_Z" and event.state == 255:
                             self.left_trigger = True
 
                         # Si le left trigger est relache
                         elif event.code == "ABS_Z" and event.state < 200:
                             self.left_trigger = False
-                            if 'up_z' in pad_keys:
-                                del pad_keys['up_z']
-                            if 'down_z' in pad_keys:
-                                del pad_keys['down_z']
-                            if 'for_y' in pad_keys:
-                                del pad_keys['for_y']
-                            if 'back_y' in pad_keys:
-                                del pad_keys['back_y']
+                            if 'y' in pad_keys:
+                                del pad_keys['y']
+                            if 'h' in pad_keys:
+                                del pad_keys['h']
+                            if 't' in pad_keys:
+                                del pad_keys['t']
+                            if 'g' in pad_keys:
+                                del pad_keys['g']
+                            if 'i' in pad_keys:
+                                del pad_keys['i']
+                            if 'o' in pad_keys:
+                                del pad_keys['o']
+                            if 'u' in pad_keys:
+                                del pad_keys['u']
+                            if 'j' in pad_keys:
+                                del pad_keys['j']
 
                         # left joystick Y
                         elif event.code == "ABS_Y":
                             if event.state > JOYSTICK_IGNORE_THRESHOLD and self.left_trigger:
-                                if 'back_y' in pad_keys:
-                                    del pad_keys['back_y']
+                                if 't' in keys:
+                                    del keys['t']
 
-                                pad_keys['back_y'] = 1
+                                keys['g'] = 1
 
                             elif event.state < -JOYSTICK_IGNORE_THRESHOLD and self.left_trigger:
-                                if 'for_y' in pad_keys:
-                                    del pad_keys['for_y']
+                                if 'g' in keys:
+                                    del keys['g']
 
-                                pad_keys['for_y'] = 1
+                                keys['t'] = 1
 
                             else:
-                                if 'back_y' in pad_keys:
-                                    del pad_keys['back_y']
-                                if 'for_y' in pad_keys:
-                                    del pad_keys['for_y']
+                                if 't' in keys:
+                                    del keys['t']
+                                if 'g' in keys:
+                                    del keys['g']
 
                         elif event.code == "ABS_RY":  # right joystick Y
                             if event.state > JOYSTICK_IGNORE_THRESHOLD and self.left_trigger:
-                                if 'down_z' in pad_keys:
-                                    del pad_keys['down_z']
+                                if 'h' in pad_keys:
+                                    del pad_keys['h']
 
-                                pad_keys['down_z'] = 1
+                                pad_keys['y'] = 1
 
                             elif event.state < -JOYSTICK_IGNORE_THRESHOLD and self.left_trigger:
-                                if 'up_z' in pad_keys:
-                                    del pad_keys['up_z']
+                                if 'y' in pad_keys:
+                                    del pad_keys['y']
 
-                                pad_keys['up_z'] = 1
+                                pad_keys['h'] = 1
 
                             else:
-                                if 'up_z' in pad_keys:
-                                    del pad_keys['up_z']
-                                if 'down_z' in pad_keys:
-                                    del pad_keys['down_z']
+                                if 'y' in pad_keys:
+                                    del pad_keys['y']
+                                if 'h' in pad_keys:
+                                    del pad_keys['h']
 
                         elif event.code == 'ABS_HAT0X':
                             if event.state == 1 and self.left_trigger:
-                                if 'rot_left' in pad_keys:
-                                    del pad_keys['rot_left']
+                                if 'i' in keys:
+                                    del keys['i']
 
-                                print 'rot right'
-
-                                pad_keys['rot_right'] = 1
+                                keys['o'] = 1
 
                             elif event.state == -1 and self.left_trigger:
-                                if 'rot_right' in pad_keys:
-                                    del pad_keys['rot_right']
+                                if 'o' in keys:
+                                    del keys['o']
 
-                                print 'rot left'
-
-                                pad_keys['rot_left'] = 1
+                                keys['i'] = 1
 
                             elif event.state == 0 and self.left_trigger:
-                                if 'rot_right' in pad_keys:
-                                    del pad_keys['rot_right']
-                                if 'rot_left' in pad_keys:
-                                    del pad_keys['rot_left']
+                                if 'i' in keys:
+                                    del keys['i']
+                                if 'o' in keys:
+                                    del keys['o']
 
                         elif event.code == 'ABS_HAT0Y':
                             if event.state == -1 and self.left_trigger:
-                                if 'wrist_down' in pad_keys:
-                                    del pad_keys['wrist_down']
+                                if 'j' in pad_keys:
+                                    del pad_keys['j']
 
-                                print 'wrist up'
-                                pad_keys['wrist_up'] = 1
+                                pad_keys['u'] = 1
 
                             elif event.state == 1 and self.left_trigger:
-                                if 'wrist_up' in pad_keys:
-                                    del pad_keys['wrist_up']
+                                if 'u' in pad_keys:
+                                    del pad_keys['u']
 
-                                print 'wrist down'
-                                pad_keys['wrist_down'] = 1
+                                pad_keys['j'] = 1
 
                             elif event.state == 0 and self.left_trigger:
-                                if 'wrist_up' in pad_keys:
-                                    del pad_keys['wrist_up']
-                                if 'wrist_down' in pad_keys:
-                                    del pad_keys['wrist_down']
+                                if 'u' in pad_keys:
+                                    del pad_keys['u']
+                                if 'j' in pad_keys:
+                                    del pad_keys['j']
 
-                        # Si le right trigger est enfonce : controle du robot
+                        # Si le right trigger est enfonce : controle du robot, utilisation du
+                        # dictionnaire pad_keys
                         if event.code == "ABS_RZ" and event.state == 255:
                             self.right_trigger = True
 
@@ -314,6 +318,11 @@ class gamepadloop(Thread):
                                 del pad_keys['left']
                             if 'right' in pad_keys:
                                 del pad_keys['right']
+                            if 'tendre_tyro' in pad_keys:
+                                del pad_keys['tendre_tyro']
+                            if 'detendre_tyro' in pad_keys:
+                                del pad_keys['detendre_tyro']
+
 
                         # left joystick Y
                         elif event.code == "ABS_Y":
@@ -398,10 +407,6 @@ class gpioloop(Thread):
     def run(self):
         while running:
 
-            arm_y = arm_state['y']
-            arm_z = arm_state['z']
-            arm_r = arm_state['r']
-
             if 'w' in keys or 'forward' in pad_keys:
                 self.motor_left_target_speed = forward_mov_speed
                 self.motor_right_target_speed = forward_mov_speed
@@ -421,33 +426,11 @@ class gpioloop(Thread):
                 self.motor_left_target_speed = 0
                 self.motor_right_target_speed = 0
 
-
-            if 'for_y' in pad_keys or 't' in keys:
-                arm_y += arm_step
-
-            elif 'back_y' in pad_keys or 'g' in keys:
-                arm_y -= arm_step
-
-            elif 'up_z' in pad_keys or 'y' in keys:
-                arm_z += arm_step
-
-            elif 'down_z' in pad_keys or 'h' in keys:
-                arm_z -= arm_step
-
-            elif 'wrist_up' in pad_keys or 'u' in keys:
-                arm_r += arm_wrist_angle_step
-
-            elif 'wrist_down' in pad_keys or 'j' in keys:
-                arm_r -= arm_wrist_angle_step
-
-            elif 'tendre_tyro' in pad_keys:
+            if 'tendre_tyro' in pad_keys:
                 arm.set_tyro_manager_state('tendre')
 
             elif 'detendre_tyro' in pad_keys:
                 arm.set_tyro_manager_state('detendre')
-
-
-            write_arm_rpc(arm_y, arm_z, arm_r)
 
             dx_left = sign(int(self.motor_left_target_speed * 10) - int(self.motor_left_actual_speed * 10))
             dx_right = sign(int(self.motor_right_target_speed * 10) - int(self.motor_right_actual_speed * 10))
