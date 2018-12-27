@@ -110,8 +110,6 @@ def handle_lacher():
 def handle_home():
     sm.stop()
 
-    write_arm_rpc(85, 200, -18)
-
 
 def handle_crochet(number):
     def handler():

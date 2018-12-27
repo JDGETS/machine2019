@@ -20,38 +20,26 @@ class KeyBouncer:
             self.flag = False
 
 
-class StateManager(Thread):
-    def __init__(self, keys, gpio):
-        '''
-        keys :: dict(string => int) # Keys currently pressed
-        '''
+class ArmStateManager(Thread):
+    def __init__(self, arm, keys, gpio):
         Thread.__init__(self)
+
         self.keys = keys
         self.gpio = gpio
         self.running = True
         self.current_state = None
         self.stop_event = Event()
+        self.set_state(TestState())
+        self.arm = arm
 
-    def stop(self):
-
-        self.current_state = None
-
-    def run(self):
-        while self.running:
-            try:
-                if self.current_state:
-                    self.current_state.update(self)
-
-                self.sleep(0.01)
-
-            except StateStop:
-                if self.current_state:
-                    self.current_state.stop()
-
-                self.current_state = None
-                self.stop_event.clear()
+    def set_state(self, state):
+        self.stop_event.clear()
+        print 'set state = ' + str(state)
+        self.current_state = state
 
     def sleep(self, sleep_time):
+        # print 'sleep'
+
         time_elapsed = 0
 
         while time_elapsed < sleep_time:
@@ -61,25 +49,35 @@ class StateManager(Thread):
             time_elapsed += 0.01
             time.sleep(0.01)
 
-    def set_state(self, state):
-        self.stop_event.clear()
-        print 'start state = ' + str(state)
-        self.current_state = state
 
+    def run(self):
+        while self.running:
+            try:
+                if not self.current_state:
+                    self.current_state = ArmManuelState()
+                    self.stop_event.clear()
 
-class ArmStateManager(StateManager):
-    def __init__(self, arm, keys, gpio):
-        StateManager.__init__(self, keys, gpio)
-        self.set_state(ArmManuelState())
-        self.arm = arm
+                self.current_state.update(self)
+
+                self.sleep(0.01)
+
+            except:
+                print 'STATE STOP'
+                if self.current_state:
+                    self.current_state.stop()
+
+                self.current_state = None
+                self.stop_event.clear()
 
     def stop(self):
         print 'stop state = ' + str(self.current_state)
 
+        self.stop_event.set()
         self.arm.stop_movement()
         self.current_state = None
 
     def wait_stopped(self):
+        print 'wait_stopped'
         self.arm.wait_stopped_sleep(self.sleep)
 
 
@@ -97,10 +95,10 @@ class State:
 class ArmManuelState(State):
     ARM_STEP = 10
     ARM_WRIST_STEP = 5
+    HOME = (85, 200, -18)
 
     def __init__(self):
         State.__init__(self)
-        self.current_position = [0, 200, 200, 0]
         self.state_manager = None
         self.base_direction = 0
         self.position_2d = [200, 200, 0]
@@ -122,7 +120,7 @@ class ArmManuelState(State):
             self.set_base_direction(0)
 
 
-        if self.frame - self.last_update > 3:
+        if self.frame - self.last_update > 0:
             if 't' in keys:
                 ay += self.ARM_STEP
             elif 'g' in keys:
@@ -150,7 +148,7 @@ class ArmManuelState(State):
             print 'arm = ' + str(pos)
             self.last_update = self.frame
 
-            self.state_manager.arm.goto2D(pos[0], pos[1], pos[2], speed=75)
+            self.state_manager.arm.goto2D(pos[0], pos[1], pos[2], speed=100)
 
 
     def set_base_direction(self, direction):
@@ -162,15 +160,6 @@ class ArmManuelState(State):
             if direction == 0:
                 # get current position?
                 pass
-
-
-    def write_goal(self, position):
-        if self.current_position != position:
-            self.current_position = position
-
-            self.state_manager.arm.goto(position)
-
-            self.state_manager.wait_stopped()
 
 
 class ArmPickupState(State):
@@ -245,3 +234,23 @@ class PickupCrochetState(State):
         state_manager.wait_stopped()
 
         state_manager.stop()
+
+
+class TestState(State):
+    def __init__(self):
+        State.__init__(self)
+
+        self.flag = True
+
+    def update(self, state_manager):
+
+        for i in range(10):
+            print state_manager.stop_event.is_set()
+
+            self.flag = not self.flag
+            if self.flag:
+                state_manager.arm.goto2D(85, 200, -18, speed=150)
+            else:
+                state_manager.arm.goto2D(230, 120, 0, speed=150)
+
+            state_manager.wait_stopped()
