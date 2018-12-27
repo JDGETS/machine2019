@@ -29,7 +29,7 @@ class ArmStateManager(Thread):
         self.running = True
         self.current_state = None
         self.stop_event = Event()
-        self.set_state(TestState())
+        self.set_state(ArmManuelState())
         self.arm = arm
 
     def set_state(self, state):

@@ -107,9 +107,12 @@ def handle_lacher():
     sm.set_state(ArmReleaseState())
 
 
-def handle_home():
+def handle_stop():
     sm.stop()
 
+
+def handle_home():
+    sm.stop()
 
 def handle_crochet(number):
     def handler():
@@ -132,9 +135,10 @@ def main():
 
     Label(master, text="MOUVEMENTS", bg="BLACK", fg="white").grid(row=1, column=0)
 
-    Button(master, text="Home", command=handle_home).grid(row=2, column=0)
+    Button(master, text="STOP", command=handle_stop).grid(row=2, column=0)
     Button(master, text="Apporter a tyrolienne", command=handle_apporter_tyro).grid(row=2, column=1)
     Button(master, text="Lacher", command=handle_lacher).grid(row=2, column=2)
+    Button(master, text="Home", command=handle_home).grid(row=2, column=3)
 
     Label(master, text="CROCHETS", bg="BLACK", fg="white").grid(row=3, column=0)
     for i in range(4):
@@ -174,7 +178,7 @@ class gamepadloop(Thread):
 
         while running:
 
-            events =[]
+            events = []
 
             try:
                 events = get_gamepad()
