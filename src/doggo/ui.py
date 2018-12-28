@@ -125,17 +125,12 @@ def handle_crochet(number):
     return handler
 
 
-def main():
-    global arm, gpio, master, running, sm
-
-    ip = config.get_param('control_ip')
-    arm = rpyc.connect(ip, 18861).root
-    gpio = pigpio.pi(ip)
-
-    master = Tk()
+def init_ui(master):
 
     # w = Canvas(master, width=500, height=500)
     # w.pack()
+
+    labels = {}
 
     Label(master, text="MOUVEMENTS", bg="BLACK", fg="white").grid(row=1, column=0)
 
@@ -153,14 +148,106 @@ def main():
     Label(master, text="CROCHETS", bg="BLACK", fg="white").grid(row=6, column=0)
     Label(master, text="CROCHETS", bg="BLACK", fg="white").grid(row=7, column=0)
 
+    Label(master, width=13, text="", bg="BLACK", fg="white").grid(row=8, column=0)
+    Label(master, width=20, text="dyn1", bg="BLACK", fg="white").grid(row=8, column=1)
+    Label(master, width=13, text="dyn2", bg="BLACK", fg="white").grid(row=8, column=2)
+    Label(master, width=13, text="dyn3", bg="BLACK", fg="white").grid(row=8, column=3)
+    Label(master, width=13, text="dyn4", bg="BLACK", fg="white").grid(row=8, column=4)
+    Label(master, width=13, text="dyn5", bg="BLACK", fg="white").grid(row=8, column=5)
+    Label(master, width=13, text="Temperatures", bg="BLACK", fg="white").grid(row=9, column=0)
+    Label(master, width=13, text="Voltages", bg="BLACK", fg="white").grid(row=10, column=0)
+    Label(master, width=13, text="Positions", bg="BLACK", fg="white").grid(row=11, column=0)
+
+
+    ## temperatures
+    temp_dyn_1 = StringVar()
+    Label(master, width=13, textvariable=temp_dyn_1, fg="BLACK").grid(row=9, column=1)
+    labels['temp_dyn_1'] = temp_dyn_1
+
+    temp_dyn_2 = StringVar()
+    Label(master, width=13, textvariable=temp_dyn_2, fg="BLACK").grid(row=9, column=2)
+    labels['temp_dyn_2'] = temp_dyn_2
+
+    temp_dyn_3 = StringVar()
+    Label(master, width=13, textvariable=temp_dyn_3, fg="BLACK").grid(row=9, column=3)
+    labels['temp_dyn_3'] = temp_dyn_3
+
+    temp_dyn_4 = StringVar()
+    Label(master, width=13, textvariable=temp_dyn_4, fg="BLACK").grid(row=9, column=4)
+    labels['temp_dyn_4'] = temp_dyn_4
+
+    temp_dyn_5 = StringVar()
+    Label(master, width=13, textvariable=temp_dyn_5, fg="BLACK").grid(row=9, column=5)
+    labels['temp_dyn_5'] = temp_dyn_5
+
+
+    ## Load
+    load_dyn_1 = StringVar()
+    Label(master, width=13, textvariable=load_dyn_1, fg="BLACK").grid(row=10, column=1)
+    labels['load_dyn_1'] = load_dyn_1
+
+    load_dyn_2 = StringVar()
+    Label(master, width=13, textvariable=load_dyn_2, fg="BLACK").grid(row=10, column=2)
+    labels['load_dyn_2'] = load_dyn_2
+
+    load_dyn_3 = StringVar()
+    Label(master, width=13, textvariable=load_dyn_3, fg="BLACK").grid(row=10, column=3)
+    labels['load_dyn_3'] = load_dyn_3
+
+    load_dyn_4 = StringVar()
+    Label(master, width=13, textvariable=load_dyn_4, fg="BLACK").grid(row=10, column=4)
+    labels['load_dyn_4'] = load_dyn_4
+
+    load_dyn_5 = StringVar()
+    Label(master, width=13, textvariable=load_dyn_5, fg="BLACK").grid(row=10, column=5)
+    labels['load_dyn_5'] = load_dyn_5
+
+
+    ## Positions
+    pos_dyn_1 = StringVar()
+    Label(master, width=13, textvariable=pos_dyn_1, fg="BLACK").grid(row=11, column=1)
+    labels['pos_dyn_1'] = pos_dyn_1
+
+    pos_dyn_2 = StringVar()
+    Label(master, width=13, textvariable=pos_dyn_2, fg="BLACK").grid(row=11, column=2)
+    labels['pos_dyn_2'] = pos_dyn_2
+
+    pos_dyn_3 = StringVar()
+    Label(master, width=13, textvariable=pos_dyn_3, fg="BLACK").grid(row=11, column=3)
+    labels['pos_dyn_3'] = pos_dyn_3
+
+    pos_dyn_4 = StringVar()
+    Label(master, width=13, textvariable=pos_dyn_4, fg="BLACK").grid(row=11, column=4)
+    labels['pos_dyn_4'] = pos_dyn_4
+
+    pos_dyn_5 = StringVar()
+    Label(master, width=13, textvariable=pos_dyn_5, fg="BLACK").grid(row=11, column=5)
+    labels['pos_dyn_5'] = pos_dyn_5
+
     master.bind("<KeyPress>", keydown)
     master.bind("<KeyRelease>", keyup)
+
+    return labels
+
+
+def main():
+    global arm, gpio, master, running, sm
+
+    ip = config.get_param('control_ip')
+    arm = rpyc.connect(ip, 18861).root
+    gpio = pigpio.pi(ip)
+
+    master = Tk()
+    labels = init_ui(master)
 
     t = gpioloop()
     t.start()
 
     t1 = gamepadloop()
     t1.start()
+
+    t2 = dynamixelInfoPinger(labels, arm)
+    t2.start()
 
     sm = ArmStateManager(arm, keys, gpio)
     sm.start()
@@ -172,7 +259,31 @@ def main():
 
     t.join()
     t1.join()
+    t2.join()
     sm.join()
+
+
+class dynamixelInfoPinger(Thread):
+    def __init__(self, labels, arm):
+        Thread.__init__(self)
+        self.labels = labels
+        self.arm = arm
+
+    def run(self):
+
+        refresh_rate = 10
+
+        while running:
+
+            dyn_infos = arm.get_chain_info()
+
+            for i in range(5):
+
+                self.labels['temp' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['temp']))
+                self.labels['load' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['load']))
+                self.labels['pos' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['position']))
+
+            time.sleep(refresh_rate)
 
 
 class gamepadloop(Thread):
@@ -192,7 +303,6 @@ class gamepadloop(Thread):
             except inputs.UnpluggedError:
                 print("Pas de manette connectee")
                 break
-
 
             for event in events:
 
@@ -384,7 +494,6 @@ class gamepadloop(Thread):
                                     del pad_keys['left']
                                 if 'right' in pad_keys:
                                     del pad_keys['right']
-
 
 
 class gpioloop(Thread):

@@ -223,7 +223,7 @@ class Arm:
         for i in [1, 2, 3, 4, 5]:
             motor = {
                 'temp': self.dyn_chain.get_reg_si(i, 'present_temp'),
-                'voltage': self.dyn_chain.get_reg_si(i, 'present_voltage'),
+                'load': self.dyn_chain.get_reg_si(i, 'present_load'),
                 'present_pos': self.dyn_chain.get_reg_si(i, 'present_position')
             }
 
@@ -237,7 +237,6 @@ def main_test_crochets():
     arm = Arm()
     # arm.open()
     # print arm.dyn_chain.get_motor_list(broadcast=False)
-
 
     # print arm.get_position()
 
