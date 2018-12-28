@@ -1,10 +1,10 @@
 import math
 
 
-L1x = 70 # x offset relative to the center of rotation (mm)
-L1z = 78 # z offset relative to the center of rotation (mm)
-L2 = 145.1 # length of the first part (mm)
-L3 = 177 # length of the second part (mm)
+L1x = 64.51 # x offset relative to the center of rotation (mm)
+L1z = 62.23 # z offset relative to the center of rotation (mm)
+L2 = 152.908 # length of the first part (mm)
+L3 = 178.308 # length of the second part (mm)
 L4 = 38.1 # length of the tool (mm) unused
 
 def ik(x, y, z, r):
@@ -29,3 +29,7 @@ def ik(x, y, z, r):
 
 def coslaw(a, b, c):
     return math.acos((a ** 2 + b ** 2 - c ** 2) / (2 * a * b))
+
+
+if __name__ == '__main__':
+    print ik(380, 0, 0, 0) # bras toute etendu
