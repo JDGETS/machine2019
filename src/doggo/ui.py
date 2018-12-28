@@ -275,7 +275,7 @@ class dynamixelInfoPinger(Thread):
             for i in range(5):
 
                 self.labels['temp_dyn_' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['temp']))
-                self.labels['load_dyn_' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['load']))
+                self.labels['load_dyn_' + str(i + 1)].set("%.2f" % float(100.0 * dyn_infos['motor' + str(i + 1)]['load']) + "%")
                 self.labels['pos_dyn_' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['present_pos']))
 
             time.sleep(refresh_rate)
