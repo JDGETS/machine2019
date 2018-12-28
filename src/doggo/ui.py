@@ -155,7 +155,7 @@ def init_ui(master):
     Label(master, width=13, text="dyn4", bg="BLACK", fg="white").grid(row=8, column=4)
     Label(master, width=13, text="dyn5", bg="BLACK", fg="white").grid(row=8, column=5)
     Label(master, width=13, text="Temperatures", bg="BLACK", fg="white").grid(row=9, column=0)
-    Label(master, width=13, text="Voltages", bg="BLACK", fg="white").grid(row=10, column=0)
+    Label(master, width=13, text="Loads", bg="BLACK", fg="white").grid(row=10, column=0)
     Label(master, width=13, text="Positions", bg="BLACK", fg="white").grid(row=11, column=0)
 
 
@@ -271,7 +271,7 @@ class dynamixelInfoPinger(Thread):
 
     def run(self):
 
-        refresh_rate = 10
+        refresh_rate = 3
 
         while running:
 
@@ -279,9 +279,9 @@ class dynamixelInfoPinger(Thread):
 
             for i in range(5):
 
-                self.labels['temp' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['temp']))
-                self.labels['load' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['load']))
-                self.labels['pos' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['position']))
+                self.labels['temp_dyn_' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['temp']))
+                self.labels['load_dyn_' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['load']))
+                self.labels['pos_dyn_' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['present_pos']))
 
             time.sleep(refresh_rate)
 

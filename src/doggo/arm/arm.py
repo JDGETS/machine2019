@@ -222,9 +222,9 @@ class Arm:
 
         for i in [1, 2, 3, 4, 5]:
             motor = {
-                'temp': self.dyn_chain.get_reg_si(i, 'present_temp'),
-                'load': self.dyn_chain.get_reg_si(i, 'present_load'),
-                'present_pos': self.dyn_chain.get_reg_si(i, 'present_position')
+                'temp': self.dyn_chain.get_reg(i, 'present_temp'),
+                'load': self.dyn_chain.get_reg(i, 'present_load'),
+                'present_pos': self.dyn_chain.get_reg(i, 'present_position')
             }
 
             dyn_infos['motor' + str(i)] = motor
