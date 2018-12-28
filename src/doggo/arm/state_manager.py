@@ -189,8 +189,10 @@ class ArmPickupState(State):
         state_manager.arm.write_single_goal(1, 616, speed=250)
         state_manager.wait_stopped()
 
-        # place le bonhomme
-        state_manager.arm.write_goal(616, 421, 560, 198, speed=100)
+        # place le bonhomme un peu trop bas
+        # ancien : 616, 421, 560, 198
+        # 594, 401, 590, 200
+        state_manager.arm.write_goal(616, 421, 568, 200, speed=100)
         state_manager.wait_stopped()
 
         # rotate a bit

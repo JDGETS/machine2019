@@ -144,10 +144,6 @@ def init_ui(master):
         Button(master, width=10, text=str(1 + i), command=handle_crochet(i + 1)).grid(row=4 + i, column=0)
         Button(master, width=10, text=str(i + 4 + 1), command=handle_crochet(i + 1 + 4)).grid(row=4 + i, column=1)
 
-    Label(master, text="Temps", bg="BLACK", fg="white").grid(row=5, column=0)
-    Label(master, text="CROCHETS", bg="BLACK", fg="white").grid(row=6, column=0)
-    Label(master, text="CROCHETS", bg="BLACK", fg="white").grid(row=7, column=0)
-
     Label(master, width=13, text="", bg="BLACK", fg="white").grid(row=8, column=0)
     Label(master, width=20, text="dyn1", bg="BLACK", fg="white").grid(row=8, column=1)
     Label(master, width=13, text="dyn2", bg="BLACK", fg="white").grid(row=8, column=2)
@@ -157,7 +153,6 @@ def init_ui(master):
     Label(master, width=13, text="Temperatures", bg="BLACK", fg="white").grid(row=9, column=0)
     Label(master, width=13, text="Loads", bg="BLACK", fg="white").grid(row=10, column=0)
     Label(master, width=13, text="Positions", bg="BLACK", fg="white").grid(row=11, column=0)
-
 
     ## temperatures
     temp_dyn_1 = StringVar()

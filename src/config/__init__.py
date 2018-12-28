@@ -6,7 +6,6 @@ def get_param(name):
     return globals()[robot_type + '_' + name]
 
 
-
 # DOGGO
 doggo_control_ip = '192.168.0.160'
 doggo_arm_ip = '192.168.0.161'
