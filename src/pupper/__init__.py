@@ -13,7 +13,7 @@ def main(instance):
     stream_cmd = "mplayer -fps 200 -demuxer h264es ffmpeg://tcp://%s:9999 > /dev/null &"
 
     if not os.getenv('NO_CAMERA'):
-        os.system(stream_cmd % get_param('_ip'))
+        os.system(stream_cmd % get_param('ip'))
 
         time.sleep(1)
 

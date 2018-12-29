@@ -16,6 +16,9 @@ keys = {}
 pad_keys = {}
 states = {}
 grip_state = True
+rotated_servo = False
+master = None
+light_state = True
 
 JOYSTICK_IGNORE_THRESHOLD = 32000
 
@@ -28,20 +31,45 @@ luminosity_step = 255/5
 luminosity = luminosity_step
 
 
-def set_grip(state):
-    if state:
-        gpio.set_servo_pulsewidth(22, 1500)
-    else:
-        gpio.set_servo_pulsewidth(22, 1200)
+def servo_180(state):
 
-    w.after(500, lambda: gpio.set_servo_pulsewidth(22, 0))
+    servo_channel = config.get_param('servo_camera_channel')
+
+    if state:
+        gpio.set_servo_pulsewidth(servo_channel, 2500)
+    else:
+        gpio.set_servo_pulsewidth(servo_channel, 500)
+
+    master.after(500, lambda: gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0))
 
 
 def keydown(e):
-    global x, y, z, r, light_state
+    global x, y, z, r, light_state, rotated_servo
     k = e.char
 
     keys[e.char] = 1
+
+    if e.char == 'l':
+
+        if light_state:
+            gpio.set_PWM_dutycycle(5, 50)
+        else:
+            gpio.set_PWM_dutycycle(5, 0)
+
+        light_state = not light_state
+
+    if e.char == 'k':
+
+        if rotated_servo:
+            gpio.set_PWM_dutycycle(config.get_param('servo_camera_channel'), 2500)
+        else:
+            gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 500)
+
+        rotated_servo = not rotated_servo
+
+    if e.char == 'j':
+
+        gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0)
 
 
 def write_pwm(pins, value):
@@ -59,7 +87,7 @@ def keyup(e):
 
 
 def main():
-    global luminosity, gpio, w, running
+    global luminosity, gpio, w, running, master
 
     ip = config.pupper1_ip
     gpio = pigpio.pi(ip)
@@ -109,18 +137,20 @@ class gamepadloop(Thread):
                     if event.ev_type == "Key":
 
                         # Bouton A : rotation camera
-                        if event.code == 'BTN_SOUTH':
-                            pass # TODO : rotation de la camera
+                        if event.code == 'BTN_SOUTH' and event.state == 1:
+                            global rotated_servo
+                            rotated_servo = not rotated_servo
+                            servo_180(rotated_servo)
 
                         elif event.code == "BTN_TR":
                             global luminosity
                             luminosity += luminosity_step
-                            write_pwm(config.pupper1_light_channel, luminosity)
+                            write_pwm(config.get_param('light_channel'), luminosity)
 
                         elif event.code == "BTN_TL":
                             global luminosity
                             luminosity -= luminosity_step
-                            write_pwm(config.pupper1_light_channel, luminosity)
+                            write_pwm(config.get_param('light_channel'), luminosity)
 
                     # Controle du mouvement avec joysticks et trigger
                     if event.ev_type == "Absolute":
@@ -228,26 +258,25 @@ class gpioloop(Thread):
             dx_left = sign(int(self.motor_left_target_speed * 10) - int(self.motor_left_actual_speed * 10))
             dx_right = sign(int(self.motor_right_target_speed * 10) - int(self.motor_right_actual_speed * 10))
 
-            # self.motor_left_actual_speed += dx_left * 10
-            # self.motor_right_actual_speed += dx_right * 10
+            self.motor_left_actual_speed += dx_left * 10
+            self.motor_right_actual_speed += dx_right * 10
 
-            # pas de rampe pour doggo, mais ma laisser ca ici en cas que il faudrait en avoir une
-            self.motor_left_actual_speed = self.motor_left_target_speed
-            self.motor_right_actual_speed = self.motor_right_target_speed
+            # self.motor_left_actual_speed = self.motor_left_target_speed
+            # self.motor_right_actual_speed = self.motor_right_target_speed
 
             if self.motor_left_actual_speed < 0:
-                write_pwm([config.pupper1_motor_left_back_channel], abs(self.motor_left_actual_speed))
-                write_pwm([config.pupper1_motor_left_for_channel], 0)
+                write_pwm([config.get_param('motor_left_back_channel')], abs(self.motor_left_actual_speed))
+                write_pwm([config.get_param('motor_left_for_channel')], 0)
             else:
-                write_pwm([config.pupper1_motor_left_for_channel], self.motor_left_actual_speed)
-                write_pwm([config.pupper1_motor_left_back_channel], 0)
+                write_pwm([config.get_param('motor_left_for_channel')], self.motor_left_actual_speed)
+                write_pwm([config.get_param('motor_left_back_channel')], 0)
 
             if self.motor_right_actual_speed < 0:
-                write_pwm([config.pupper1_motor_right_back_channel], abs(self.motor_right_actual_speed))
-                write_pwm([config.pupper1_motor_right_for_channel], 0)
+                write_pwm([config.get_param('motor_right_back_channel')], abs(self.motor_right_actual_speed))
+                write_pwm([config.get_param('motor_right_for_channel')], 0)
             else:
-                write_pwm([config.pupper1_motor_right_for_channel], self.motor_right_actual_speed)
-                write_pwm([config.pupper1_motor_right_back_channel], 0)
+                write_pwm([config.get_param('motor_right_for_channel')], self.motor_right_actual_speed)
+                write_pwm([config.get_param('motor_right_back_channel')], 0)
 
             time.sleep(1/60.0)
 

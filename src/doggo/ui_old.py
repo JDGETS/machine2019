@@ -11,7 +11,7 @@ MOTOR_LEFT_BACK_CHANEL = 12
 MOTOR_RIGHT_FOR_CHANEL = 27
 MOTOR_RIGHT_BACK_CHANEL = 17
 
-pi_hostname = 'doggo-control'
+pi_hostname = '192.168.0.100'
 # pi = rpyc.connect(pi_hostname, 18861).root
 gpio = pigpio.pi(pi_hostname)
 
@@ -49,10 +49,9 @@ def keydown(e):
     if k == 'l':
 
         if light_state:
-            gpio.set_PWM_dutycycle(10, 50)
+            gpio.set_PWM_dutycycle(5, 50)
         else:
-            gpio.set_PWM_dutycycle(10, 0)
-
+            gpio.set_PWM_dutycycle(5, 0)
 
         light_state = not light_state
 
@@ -154,7 +153,7 @@ t = gpioloop()
 t.start()
 
 try:
-    # mainloop()
+    mainloop()
     pass
 except:
     pass
