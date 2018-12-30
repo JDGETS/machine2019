@@ -72,7 +72,7 @@ def keydown(e):
         rotated_servo = not rotated_servo
 
     if e.char == 'j':
-        gpio.set_servo_self.statepulsewidth(config.get_param('servo_camera_channel'), 0)
+        gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0)
 
 
 def write_pwm(pins, value):
@@ -261,8 +261,8 @@ class gpioloop(Thread):
             self.motor_left_actual_speed += dx_left * 20
             self.motor_right_actual_speed += dx_right * 20
 
-            self.motor_left_actual_speed = self.motor_left_target_speed
-            self.motor_right_actual_speed = self.motor_right_target_speed
+            # self.motor_left_actual_speed = self.motor_left_target_speed
+            # self.motor_right_actual_speed = self.motor_right_target_speed
 
             if self.motor_left_actual_speed < 0:
                 write_pwm([config.get_param('motor_left_back_channel')], abs(self.motor_left_actual_speed))
