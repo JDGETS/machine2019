@@ -61,9 +61,11 @@ def keydown(e):
     if e.char == 'k':
 
         if rotated_servo:
-            gpio.set_PWM_dutycycle(config.get_param('servo_camera_channel'), 2500)
+            gpio.set_PWM_dutycycle(config.get_param('servo_camera_channel'), 240)
+            #gpio.hardware_PWM(19, 50, 100000) # 800Hz 25% dutycycle
         else:
-            gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 500)
+            gpio.set_PWM_dutycycle(config.get_param('servo_camera_channel'), 10)
+            #gpio.hardware_PWM(19, 50, 900000) # 800Hz 25% dutycycle
 
         rotated_servo = not rotated_servo
 
@@ -129,9 +131,8 @@ class gamepadloop(Thread):
             try:
                 events = get_gamepad()
             except inputs.UnpluggedError:
-                print("Pas de manette connectee")
-
-            for event in events:
+                #print("Pas de manette connectee")
+                for event in events:
 
                     # Controle d'evenements et actions avec les boutons
                     if event.ev_type == "Key":
@@ -141,6 +142,7 @@ class gamepadloop(Thread):
                             global rotated_servo
                             rotated_servo = not rotated_servo
                             servo_180(rotated_servo)
+                            print "hello"
 
                         elif event.code == "BTN_TR":
                             global luminosity

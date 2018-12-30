@@ -3,7 +3,7 @@ import cv2 as cv
 import math
 import numpy as np
 
-img = cv2.imread('./git/vision/output.jpg')
+img = cv2.imread('output.jpg')
 
 cv2.imshow('image', img)
 
