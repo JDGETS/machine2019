@@ -23,9 +23,9 @@ light_state = True
 JOYSTICK_IGNORE_THRESHOLD = 32000
 
 # Robot Moving speed
-forward_mov_speed = 150
-backwards_mov_speed = 120
-rotation_speed = 120
+forward_mov_speed = 200
+backwards_mov_speed = 180
+rotation_speed = 180
 
 luminosity_step = 255/5
 luminosity = luminosity_step
@@ -61,9 +61,11 @@ def keydown(e):
     if e.char == 'k':
 
         if rotated_servo:
+            print "low"
             gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 600)
             #gpio.hardware_PWM(19, 50, 100000) # 800Hz 25% dutycycle
         else:
+            print "high"
             gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 2300)
             #gpio.hardware_PWM(19, 50, 900000) # 800Hz 25% dutycycle
 
@@ -257,14 +259,14 @@ class gpioloop(Thread):
                 self.motor_left_target_speed = 0
                 self.motor_right_target_speed = 0
 
-            dx_left = sign(int(self.motor_left_target_speed * 10) - int(self.motor_left_actual_speed * 10))
-            dx_right = sign(int(self.motor_right_target_speed * 10) - int(self.motor_right_actual_speed * 10))
+            #dx_left = sign(int(self.motor_left_target_speed * 10) - int(self.motor_left_actual_speed * 10))
+            #dx_right = sign(int(self.motor_right_target_speed * 10) - int(self.motor_right_actual_speed * 10))
 
-            self.motor_left_actual_speed += dx_left * 10
-            self.motor_right_actual_speed += dx_right * 10
+            #self.motor_left_actual_speed += dx_left * 20
+            #self.motor_right_actual_speed += dx_right * 20
 
-            # self.motor_left_actual_speed = self.motor_left_target_speed
-            # self.motor_right_actual_speed = self.motor_right_target_speed
+            self.motor_left_actual_speed = self.motor_left_target_speed
+            self.motor_right_actual_speed = self.motor_right_target_speed
 
             if self.motor_left_actual_speed < 0:
                 write_pwm([config.get_param('motor_left_back_channel')], abs(self.motor_left_actual_speed))
