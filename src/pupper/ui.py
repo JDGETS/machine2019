@@ -23,7 +23,24 @@ light_state = True
 JOYSTICK_IGNORE_THRESHOLD = 32000
 
 # Robot Moving speed
-forward_mov_speed = 24000, lambda: gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0))
+forward_mov_speed = 240
+backwards_mov_speed = 180
+rotation_speed = 180
+
+luminosity_step = 255/5
+luminosity = luminosity_step
+
+
+def servo_180(state):
+
+    servo_channel = config.get_param('servo_camera_channel')
+
+    if state:
+        gpio.set_servo_pulsewidth(servo_channel, 2500)
+    else:
+        gpio.set_servo_pulsewidth(servo_channel, 500)
+
+    master.after(500, lambda: gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0))
 
 
 def keydown(e):
@@ -244,8 +261,8 @@ class gpioloop(Thread):
             self.motor_left_actual_speed += dx_left * 20
             self.motor_right_actual_speed += dx_right * 20
 
-            # self.motor_left_actual_speed = self.motor_left_target_speed
-            # self.motor_right_actual_speed = self.motor_right_target_speed
+            self.motor_left_actual_speed = self.motor_left_target_speed
+            self.motor_right_actual_speed = self.motor_right_target_speed
 
             if self.motor_left_actual_speed < 0:
                 write_pwm([config.get_param('motor_left_back_channel')], abs(self.motor_left_actual_speed))
