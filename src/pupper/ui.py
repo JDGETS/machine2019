@@ -23,24 +23,7 @@ light_state = True
 JOYSTICK_IGNORE_THRESHOLD = 32000
 
 # Robot Moving speed
-forward_mov_speed = 200
-backwards_mov_speed = 180
-rotation_speed = 180
-
-luminosity_step = 255/5
-luminosity = luminosity_step
-
-
-def servo_180(state):
-
-    servo_channel = config.get_param('servo_camera_channel')
-
-    if state:
-        gpio.set_servo_pulsewidth(servo_channel, 2500)
-    else:
-        gpio.set_servo_pulsewidth(servo_channel, 500)
-
-    master.after(500, lambda: gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0))
+forward_mov_speed = 24000, lambda: gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0))
 
 
 def keydown(e):
@@ -72,8 +55,7 @@ def keydown(e):
         rotated_servo = not rotated_servo
 
     if e.char == 'j':
-
-        gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0)
+        gpio.set_servo_self.statepulsewidth(config.get_param('servo_camera_channel'), 0)
 
 
 def write_pwm(pins, value):
@@ -133,6 +115,8 @@ class gamepadloop(Thread):
             try:
                 events = get_gamepad()
             except inputs.UnpluggedError:
+                break
+
                 #print("Pas de manette connectee")
                 for event in events:
 
@@ -235,38 +219,33 @@ class gpioloop(Thread):
     def run(self):
         while running:
             if 'w' in keys or 'forward' in pad_keys:
-                self.state = 'forward'
                 self.motor_left_target_speed = forward_mov_speed
                 self.motor_right_target_speed = forward_mov_speed
 
             elif 's' in keys or 'backward' in pad_keys:
-                self.state = 'backward'
                 self.motor_left_target_speed = -backwards_mov_speed
                 self.motor_right_target_speed = -backwards_mov_speed
 
             elif 'd' in keys or 'right' in pad_keys:
-                self.state = 'right'
                 self.motor_left_target_speed = rotation_speed
                 self.motor_right_target_speed = -rotation_speed
 
             elif 'a' in keys or 'left' in pad_keys:
-                self.state = 'left'
                 self.motor_left_target_speed = -rotation_speed
                 self.motor_right_target_speed = rotation_speed
 
             else:
-                self.state = 'stop'
                 self.motor_left_target_speed = 0
                 self.motor_right_target_speed = 0
 
-            #dx_left = sign(int(self.motor_left_target_speed * 10) - int(self.motor_left_actual_speed * 10))
-            #dx_right = sign(int(self.motor_right_target_speed * 10) - int(self.motor_right_actual_speed * 10))
+            dx_left = sign(int(self.motor_left_target_speed * 10) - int(self.motor_left_actual_speed * 10))
+            dx_right = sign(int(self.motor_right_target_speed * 10) - int(self.motor_right_actual_speed * 10))
 
-            #self.motor_left_actual_speed += dx_left * 20
-            #self.motor_right_actual_speed += dx_right * 20
+            self.motor_left_actual_speed += dx_left * 20
+            self.motor_right_actual_speed += dx_right * 20
 
-            self.motor_left_actual_speed = self.motor_left_target_speed
-            self.motor_right_actual_speed = self.motor_right_target_speed
+            # self.motor_left_actual_speed = self.motor_left_target_speed
+            # self.motor_right_actual_speed = self.motor_right_target_speed
 
             if self.motor_left_actual_speed < 0:
                 write_pwm([config.get_param('motor_left_back_channel')], abs(self.motor_left_actual_speed))
