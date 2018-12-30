@@ -61,10 +61,10 @@ def keydown(e):
     if e.char == 'k':
 
         if rotated_servo:
-            gpio.set_PWM_dutycycle(config.get_param('servo_camera_channel'), 240)
+            gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 600)
             #gpio.hardware_PWM(19, 50, 100000) # 800Hz 25% dutycycle
         else:
-            gpio.set_PWM_dutycycle(config.get_param('servo_camera_channel'), 10)
+            gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 2300)
             #gpio.hardware_PWM(19, 50, 900000) # 800Hz 25% dutycycle
 
         rotated_servo = not rotated_servo

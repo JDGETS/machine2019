@@ -22,13 +22,13 @@ pupper_defaults = {
 }
 
 # PUPPER1
-pupper1_ip = '192.168.0.100'
+pupper1_ip = '192.168.0.124'
 pupper1_motor_left_for_channel = 27
 pupper1_motor_left_back_channel = 17
 pupper1_motor_right_for_channel = 26
 pupper1_motor_right_back_channel = 22
 pupper1_light_channel = 5
-pupper1_servo_camera_channel = 6
+pupper1_servo_camera_channel = 19
 
 # PUPPER2
-pupper2_ip =  '192.168.0.164'
+pupper2_ip = '192.168.0.100'
