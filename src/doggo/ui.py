@@ -26,7 +26,7 @@ speed_mode = False
 JOYSTICK_IGNORE_THRESHOLD = 32000
 
 # Robot moving speed
-forward_mov_speed = 150
+forward_mov_speed = 160
 backwards_mov_speed = 150
 rotation_speed = 150
 
@@ -510,7 +510,15 @@ class gpioloop(Thread):
     def run(self):
         while running:
 
-            if 'w' in keys or 'forward' in pad_keys:
+            if 'w' in keys and 'a' in keys:
+                self.motor_left_target_speed = 70 # forward_mov_speed / 2
+                self.motor_right_target_speed = forward_mov_speed
+
+            elif 'w' in keys and 'd' in keys:
+                self.motor_left_target_speed = forward_mov_speed
+                self.motor_right_target_speed = 70 # forward_mov_speed / 2
+
+            elif 'w' in keys or 'forward' in pad_keys:
                 self.motor_left_target_speed = forward_mov_speed
                 self.motor_right_target_speed = forward_mov_speed
 
