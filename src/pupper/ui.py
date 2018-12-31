@@ -248,6 +248,13 @@ class gpioloop(Thread):
                 self.motor_left_target_speed = forward_mov_speed
                 self.motor_right_target_speed = forward_mov_speed
 
+            elif 'e' in keys in pad_keys:
+                self.motor_right_target_speed = forward_mov_speed
+                self.motor_left_target_speed = 0
+            elif 'q' in keys in pad_keys:
+                self.motor_left_target_speed = forward_mov_speed
+                self.motor_right_target_speed = 0
+
             elif 's' in keys or 'backward' in pad_keys:
                 self.motor_left_target_speed = -backwards_mov_speed
                 self.motor_right_target_speed = -backwards_mov_speed
