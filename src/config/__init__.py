@@ -35,6 +35,8 @@ pupper1_rotation_speed = 180
 pupper1_acceleration_ratio = 5
 pupper1_servo_camera_front = 500
 pupper1_servo_camera_back = 2300
+pupper2_speed_motor_right = 100
+pupper2_speed_motor_left = 90
 
 # PUPPER2
 pupper2_ip = '192.168.0.172'
@@ -50,3 +52,5 @@ pupper2_rotation_speed = 180
 pupper2_acceleration_ratio = 20
 pupper2_servo_camera_front = 500
 pupper2_servo_camera_back = 2300
+pupper2_speed_motor_right = 100
+pupper2_speed_motor_left = 90

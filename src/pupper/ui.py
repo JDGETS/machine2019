@@ -286,6 +286,9 @@ class gpioloop(Thread):
             # self.motor_left_actual_speed = self.motor_left_target_speed
             # self.motor_right_actual_speed = self.motor_right_target_speed
 
+            self.motor_left_actual_speed *= config.get_param('speed_motor_left')
+            self.motor_right_actual_speed *= config.get_param('speed_motor_right')
+
             if self.motor_left_actual_speed < 0:
                 write_pwm([config.get_param('motor_left_back_channel')], abs(self.motor_left_actual_speed))
                 write_pwm([config.get_param('motor_left_for_channel')], 0)
