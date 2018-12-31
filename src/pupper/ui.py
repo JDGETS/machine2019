@@ -24,9 +24,13 @@ light_value = 0
 JOYSTICK_IGNORE_THRESHOLD = 32000
 
 # Robot Moving speed
-forward_mov_speed = 240
-backwards_mov_speed = 180
-rotation_speed = 180
+forward_mov_speed = config.get_param('for_speed')
+backwards_mov_speed = config.get_param('back_speed')
+rotation_speed = config.get_param('rotation_speed')
+
+servo_camera_front = config.get_param('servo_camera_front')
+servo_camera_back = config.get_param('servo_camera_back')
+
 
 luminosity_step = 255/5
 luminosity = luminosity_step
@@ -37,9 +41,9 @@ def servo_180(state):
     servo_channel = config.get_param('servo_camera_channel')
 
     if state:
-        gpio.set_servo_pulsewidth(servo_channel, 2500)
+        gpio.set_servo_pulsewidth(servo_channel, servo_camera_front )
     else:
-        gpio.set_servo_pulsewidth(servo_channel, 500)
+        gpio.set_servo_pulsewidth(servo_channel, servo_camera_back )
 
     master.after(500, lambda: gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0))
 
@@ -68,16 +72,16 @@ def keydown(e):
 
         if rotated_servo:
             print "low"
-            gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 600)
+            gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), servo_camera_front)
             #gpio.hardware_PWM(19, 50, 100000) # 800Hz 25% dutycycle
         else:
             print "high"
-            gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 2300)
+            gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), servo_camera_back)
             #gpio.hardware_PWM(19, 50, 900000) # 800Hz 25% dutycycle
 
         rotated_servo = not rotated_servo
 
-        master.after(1000, lambda: gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0))
+        master.after(500, lambda: gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0))
         
 
     if e.char == 'j':
@@ -101,7 +105,7 @@ def keyup(e):
 def main():
     global luminosity, gpio, w, running, master
 
-    ip = config.pupper1_ip
+    ip = config.get_param('ip') 
     gpio = pigpio.pi(ip)
 
     master = Tk()
@@ -234,6 +238,8 @@ class gpioloop(Thread):
         self.target_x = 0
         self.actual_x = 0
 
+        self.acceleration_ratio = config.get_param('acceleration_ratio')
+
         self.motor_left_actual_speed = 0
         self.motor_left_target_speed = 0
 
@@ -274,8 +280,8 @@ class gpioloop(Thread):
             dx_left = sign(int(self.motor_left_target_speed * 10) - int(self.motor_left_actual_speed * 10))
             dx_right = sign(int(self.motor_right_target_speed * 10) - int(self.motor_right_actual_speed * 10))
 
-            self.motor_left_actual_speed += dx_left * 20
-            self.motor_right_actual_speed += dx_right * 20
+            self.motor_left_actual_speed += dx_left * self.acceleration_ratio
+            self.motor_right_actual_speed += dx_right * self.acceleration_ratio
 
             # self.motor_left_actual_speed = self.motor_left_target_speed
             # self.motor_right_actual_speed = self.motor_right_target_speed
