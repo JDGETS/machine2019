@@ -8,7 +8,7 @@ import pyzbar.pyzbar as pyzbar
 WINDOW_NAME_STREAM = "stream"
 WINDOW_NAME_HD_PIC = "hd picture"
 
-IP_ADDRESS = "raspberrypi-2"
+IP_ADDRESS = "192.168.0.105"
 PORT_HD = 9000
 PORT_STREAM = 9999
 
@@ -18,7 +18,7 @@ SIZE_BUTTON = 80
 
 BUTTON_QR = (100,100,SIZE_BUTTON,SIZE_BUTTON)
 BUTTON_2D_FIGUR = (100,200,SIZE_BUTTON,SIZE_BUTTON)
-BUTTON_NEXT = (100,500,175,175)
+BUTTON_NEXT = (100,100,175,175)
 
 
 FONT = cv2.FONT_HERSHEY_SIMPLEX
@@ -71,12 +71,12 @@ class take_hd_image_state:
         self.cap = cv2.VideoCapture("tcp://"+IP_ADDRESS+":"+str(PORT_HD))
         work, img = self.cap.read()
 
-        K = np.array([[2.26397279e+03, 0, 1.65100045e+03],
-                      [0., 2.47653921e+03, 1.24539838e+03],
+        K = np.array([[2.55734713e+03, 0, 1.66221758e+03],
+                      [0., 2.55828222e+03, 1.17670281e+03],
                       [0., 0., 1.]])
 
         #Define distortion coefficients d
-        d = np.array([0.19287504, -0.53398298, -0.00652931, -0.00082941, 0.40923367])
+        d = np.array([0.18400666, -0.55359429, -0.00706629, -0.00137952, 0.43185508])
 
         (h, w) = img.shape[:2]
 
@@ -240,6 +240,8 @@ class transform_correction_image_state:
             if len(self.list_position) != 3:
                 self.list_position.append((x, y))
             else:
+
+                self.list_position.append((x, y))
                 
                 dx = self.list_position[1][0] - self.list_position[0][0]
                 dy = self.list_position[1][1] - self.list_position[0][1]
@@ -247,7 +249,7 @@ class transform_correction_image_state:
                 print "etape 1"
                 print self.list_position
 
-                self.list_position.append((self.list_position[-1][0] - dx, self.list_position[-1][1] - dy))
+                #self.list_position.append((self.list_position[-1][0] - dx, self.list_position[-1][1] - dy))
 
                 print "etape 2"
                 print self.list_position
