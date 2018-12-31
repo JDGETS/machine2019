@@ -19,6 +19,7 @@ grip_state = True
 rotated_servo = False
 master = None
 light_state = True
+light_value = 0
 
 JOYSTICK_IGNORE_THRESHOLD = 32000
 
@@ -44,19 +45,24 @@ def servo_180(state):
 
 
 def keydown(e):
-    global x, y, z, r, light_state, rotated_servo
+    global x, y, z, r, light_state, light_value, rotated_servo
     k = e.char
 
     keys[e.char] = 1
 
     if e.char == 'l':
-
-        if light_state:
-            gpio.set_PWM_dutycycle(5, 50)
+        if(light_state == True):
+            light_value = 50
+            light_state = False
         else:
-            gpio.set_PWM_dutycycle(5, 0)
+            light_value = 0
+            light_state = True
+    elif e.char == 'm' and light_value <= 100:
+        light_value += 5
+    elif e.char == 'n' and light_value > 5:
+        light_value -= 5
 
-        light_state = not light_state
+    gpio.set_PWM_dutycycle(5, light_value)
 
     if e.char == 'k':
 
@@ -70,6 +76,9 @@ def keydown(e):
             #gpio.hardware_PWM(19, 50, 900000) # 800Hz 25% dutycycle
 
         rotated_servo = not rotated_servo
+
+        master.after(1000, lambda: gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0))
+        
 
     if e.char == 'j':
         gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0)
@@ -243,11 +252,11 @@ class gpioloop(Thread):
                 self.motor_left_target_speed = -backwards_mov_speed
                 self.motor_right_target_speed = -backwards_mov_speed
 
-            elif 'd' in keys or 'right' in pad_keys:
+            elif 'a' in keys or 'right' in pad_keys:
                 self.motor_left_target_speed = rotation_speed
                 self.motor_right_target_speed = -rotation_speed
 
-            elif 'a' in keys or 'left' in pad_keys:
+            elif 'd' in keys or 'left' in pad_keys:
                 self.motor_left_target_speed = -rotation_speed
                 self.motor_right_target_speed = rotation_speed
 
