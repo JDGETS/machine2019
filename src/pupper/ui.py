@@ -102,6 +102,11 @@ def keyup(e):
         del keys[e.char]
 
 
+def start_vision():
+    # TODO : MARC PLUG CA ICITTE
+    pass
+
+
 def main():
     global luminosity, gpio, w, running, master
 
@@ -109,9 +114,10 @@ def main():
     gpio = pigpio.pi(ip)
 
     master = Tk()
+    master.title('Pupper control')
+    master.geometry('500x500')
 
-    w = Canvas(master, width=500, height=500)
-    w.pack()
+    Button(master, text="START VISION", command=start_vision).grid(row=2, column=0)
 
     master.bind("<KeyPress>", keydown)
     master.bind("<KeyRelease>", keyup)
