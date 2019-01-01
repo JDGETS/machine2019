@@ -150,36 +150,10 @@ def init_ui(master):
     Label(master, width=13, text="dyn3", bg="BLACK", fg="white").grid(row=8, column=3)
     Label(master, width=13, text="dyn4", bg="BLACK", fg="white").grid(row=8, column=4)
     Label(master, width=13, text="dyn5", bg="BLACK", fg="white").grid(row=8, column=5)
-    Label(master, width=13, text="dyn8", bg="BLACK", fg="white").grid(row=8, column=6)
+    Label(master, width=13, text="dyn8 - tyro", bg="BLACK", fg="white").grid(row=8, column=6)
     Label(master, width=13, text="Temperatures", bg="BLACK", fg="white").grid(row=9, column=0)
     Label(master, width=13, text="Loads", bg="BLACK", fg="white").grid(row=10, column=0)
     Label(master, width=13, text="Positions", bg="BLACK", fg="white").grid(row=11, column=0)
-
-    ## temperatures
-    temp_dyn_1 = StringVar()
-    Label(master, width=13, textvariable=temp_dyn_1, fg="BLACK").grid(row=9, column=1)
-    labels['temp_dyn_1'] = temp_dyn_1
-
-    temp_dyn_2 = StringVar()
-    Label(master, width=13, textvariable=temp_dyn_2, fg="BLACK").grid(row=9, column=2)
-    labels['temp_dyn_2'] = temp_dyn_2
-
-    temp_dyn_3 = StringVar()
-    Label(master, width=13, textvariable=temp_dyn_3, fg="BLACK").grid(row=9, column=3)
-    labels['temp_dyn_3'] = temp_dyn_3
-
-    temp_dyn_4 = StringVar()
-    Label(master, width=13, textvariable=temp_dyn_4, fg="BLACK").grid(row=9, column=4)
-    labels['temp_dyn_4'] = temp_dyn_4
-
-    temp_dyn_5 = StringVar()
-    Label(master, width=13, textvariable=temp_dyn_5, fg="BLACK").grid(row=9, column=5)
-    labels['temp_dyn_5'] = temp_dyn_5
-
-    temp_dyn_8 = StringVar()
-    Label(master, width=13, textvariable=temp_dyn_8, fg="BLACK").grid(row=9, column=5)
-    labels['temp_dyn_8'] = temp_dyn_8
-
 
     ## Load
     load_dyn_1 = StringVar()
@@ -203,7 +177,7 @@ def init_ui(master):
     labels['load_dyn_5'] = load_dyn_5
 
     load_dyn_8 = StringVar()
-    Label(master, width=13, textvariable=load_dyn_8, fg="BLACK").grid(row=10, column=5)
+    Label(master, width=13, textvariable=load_dyn_8, fg="BLACK").grid(row=10, column=6)
     labels['load_dyn_8'] = load_dyn_8
 
 
@@ -231,6 +205,32 @@ def init_ui(master):
     pos_dyn_8 = StringVar()
     Label(master, width=13, textvariable=pos_dyn_8, fg="BLACK").grid(row=11, column=6)
     labels['pos_dyn_8'] = pos_dyn_8
+
+
+    ## temperatures
+    temp_dyn_1 = StringVar()
+    Label(master, width=13, textvariable=temp_dyn_1, fg="BLACK").grid(row=9, column=1)
+    labels['temp_dyn_1'] = temp_dyn_1
+
+    temp_dyn_2 = StringVar()
+    Label(master, width=13, textvariable=temp_dyn_2, fg="BLACK").grid(row=9, column=2)
+    labels['temp_dyn_2'] = temp_dyn_2
+
+    temp_dyn_3 = StringVar()
+    Label(master, width=13, textvariable=temp_dyn_3, fg="BLACK").grid(row=9, column=3)
+    labels['temp_dyn_3'] = temp_dyn_3
+
+    temp_dyn_4 = StringVar()
+    Label(master, width=13, textvariable=temp_dyn_4, fg="BLACK").grid(row=9, column=4)
+    labels['temp_dyn_4'] = temp_dyn_4
+
+    temp_dyn_5 = StringVar()
+    Label(master, width=13, textvariable=temp_dyn_5, fg="BLACK").grid(row=9, column=5)
+    labels['temp_dyn_5'] = temp_dyn_5
+
+    temp_dyn_8 = StringVar()
+    Label(master, width=13, textvariable=temp_dyn_8, fg="BLACK").grid(row=9, column=6)
+    labels['temp_dyn_8'] = temp_dyn_8
 
     master.bind("<KeyPress>", keydown)
     master.bind("<KeyRelease>", keyup)
