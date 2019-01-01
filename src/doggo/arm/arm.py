@@ -255,6 +255,15 @@ class Arm:
 
         return dyn_infos
 
+    def reset_servos_torque(self):
+        servos = [1, 2, 3, 4, 5, 8]
+
+        self.dyn_chain.disable(servos)
+
+        for id in servos:
+            self.dyn_chain.set_reg(id, 'moving_speed', 10)
+            self.dyn_chain.set_reg(id, 'torque_limit', 1023)
+
 
 def main_test_crochets():
 

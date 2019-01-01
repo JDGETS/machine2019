@@ -102,6 +102,10 @@ def keyup(e):
         del keys[e.char]
 
 
+def handle_reset_torque():
+    arm.reset_servos_torque()
+
+
 def handle_apporter_tyro():
     sm.set_state(ArmPickupState())
 
@@ -231,6 +235,8 @@ def init_ui(master):
     temp_dyn_8 = StringVar()
     Label(master, width=13, textvariable=temp_dyn_8, fg="BLACK").grid(row=9, column=6)
     labels['temp_dyn_8'] = temp_dyn_8
+
+    Button(master, width=10, text="RESET TORQUE", command=handle_reset_torque).grid(row=12, column=0)
 
     master.bind("<KeyPress>", keydown)
     master.bind("<KeyRelease>", keyup)
