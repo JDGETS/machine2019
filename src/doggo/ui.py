@@ -150,6 +150,7 @@ def init_ui(master):
     Label(master, width=13, text="dyn3", bg="BLACK", fg="white").grid(row=8, column=3)
     Label(master, width=13, text="dyn4", bg="BLACK", fg="white").grid(row=8, column=4)
     Label(master, width=13, text="dyn5", bg="BLACK", fg="white").grid(row=8, column=5)
+    Label(master, width=13, text="dyn8", bg="BLACK", fg="white").grid(row=8, column=6)
     Label(master, width=13, text="Temperatures", bg="BLACK", fg="white").grid(row=9, column=0)
     Label(master, width=13, text="Loads", bg="BLACK", fg="white").grid(row=10, column=0)
     Label(master, width=13, text="Positions", bg="BLACK", fg="white").grid(row=11, column=0)
@@ -175,6 +176,10 @@ def init_ui(master):
     Label(master, width=13, textvariable=temp_dyn_5, fg="BLACK").grid(row=9, column=5)
     labels['temp_dyn_5'] = temp_dyn_5
 
+    temp_dyn_8 = StringVar()
+    Label(master, width=13, textvariable=temp_dyn_8, fg="BLACK").grid(row=9, column=5)
+    labels['temp_dyn_8'] = temp_dyn_8
+
 
     ## Load
     load_dyn_1 = StringVar()
@@ -197,6 +202,10 @@ def init_ui(master):
     Label(master, width=13, textvariable=load_dyn_5, fg="BLACK").grid(row=10, column=5)
     labels['load_dyn_5'] = load_dyn_5
 
+    load_dyn_8 = StringVar()
+    Label(master, width=13, textvariable=load_dyn_8, fg="BLACK").grid(row=10, column=5)
+    labels['load_dyn_8'] = load_dyn_8
+
 
     ## Positions
     pos_dyn_1 = StringVar()
@@ -218,6 +227,10 @@ def init_ui(master):
     pos_dyn_5 = StringVar()
     Label(master, width=13, textvariable=pos_dyn_5, fg="BLACK").grid(row=11, column=5)
     labels['pos_dyn_5'] = pos_dyn_5
+
+    pos_dyn_8 = StringVar()
+    Label(master, width=13, textvariable=pos_dyn_8, fg="BLACK").grid(row=11, column=6)
+    labels['pos_dyn_8'] = pos_dyn_8
 
     master.bind("<KeyPress>", keydown)
     master.bind("<KeyRelease>", keyup)
@@ -272,11 +285,11 @@ class dynamixelInfoPinger(Thread):
 
             dyn_infos = arm.get_chain_info()
 
-            for i in range(5):
+            for i in [1, 2, 3, 4, 5, 8]:
 
-                self.labels['temp_dyn_' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['temp']))
-                self.labels['load_dyn_' + str(i + 1)].set("%.2f" % float(100.0 * dyn_infos['motor' + str(i + 1)]['load']) + "%")
-                self.labels['pos_dyn_' + str(i + 1)].set(str(dyn_infos['motor' + str(i + 1)]['present_pos']))
+                self.labels['temp_dyn_' + str(i)].set(str(dyn_infos['motor' + str(i)]['temp']))
+                self.labels['load_dyn_' + str(i)].set("%.2f" % float(100.0 * dyn_infos['motor' + str(i)]['load']) + "%")
+                self.labels['pos_dyn_' + str(i)].set(str(dyn_infos['motor' + str(i)]['present_pos']))
 
             time.sleep(refresh_rate)
 
