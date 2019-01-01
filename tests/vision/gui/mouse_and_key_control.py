@@ -7,8 +7,7 @@ import pyzbar.pyzbar as pyzbar
 
 WINDOW_NAME_STREAM = "stream"
 WINDOW_NAME_HD_PIC = "hd picture"
-
-IP_ADDRESS = "192.168.0.172"
+IP_ADDRESS = "192.168.1.172"
 PORT_HD = 9000
 PORT_STREAM = 9999
 
