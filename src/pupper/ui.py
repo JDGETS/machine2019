@@ -93,7 +93,7 @@ def write_pwm(pins, value):
         if pin not in states or states[pin] != value:
             states[pin] = value
 
-            print ('write', pin, value)
+            #print ('write', pin, value)
             gpio.set_PWM_dutycycle(pin, value)
 
 
@@ -265,13 +265,17 @@ class gpioloop(Thread):
                 self.motor_left_target_speed = -backwards_mov_speed
                 self.motor_right_target_speed = -backwards_mov_speed
 
-            elif 'a' in keys or 'right' in pad_keys:
-                self.motor_left_actual_speed = self.motor_left_target_speed = rotation_speed
-                self.motor_right_actual_speed = self.motor_right_target_speed = -rotation_speed
+            elif 'd' in keys or 'right' in pad_keys:
+                self.motor_left_target_speed = rotation_speed
+                self.motor_right_target_speed = -rotation_speed
 
-            elif 'd' in keys or 'left' in pad_keys:
-                self.motor_left_actual_speed = self.motor_left_target_speed = -rotation_speed
-                self.motor_right_actual_speed = self.motor_right_target_speed = rotation_speed
+            elif 'a' in keys or 'left' in pad_keys:
+                self.motor_left_target_speed = -rotation_speed
+                self.motor_right_target_speed = rotation_speed
+
+            elif 'z' in keys:
+                self.motor_left_target_speed = -2*backwards_mov_speed
+                self.motor_right_target_speed = -2*backwards_mov_speed
 
             else:
                 self.motor_left_target_speed = 0
@@ -285,6 +289,9 @@ class gpioloop(Thread):
 
             # self.motor_left_actual_speed = self.motor_left_target_speed
             # self.motor_right_actual_speed = self.motor_right_target_speed
+
+            self.motor_left_actual_speed =  int(self.motor_left_actual_speed * config.get_param('speed_motor_left')/100.0)
+            self.motor_right_actual_speed = int(self.motor_right_actual_speed * config.get_param('speed_motor_right')/100.0)
 
             if self.motor_left_actual_speed < 0:
                 write_pwm([config.get_param('motor_left_back_channel')], abs(self.motor_left_actual_speed))
