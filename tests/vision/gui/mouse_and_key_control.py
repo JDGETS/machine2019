@@ -7,8 +7,7 @@ import pyzbar.pyzbar as pyzbar
 
 WINDOW_NAME_STREAM = "stream"
 WINDOW_NAME_HD_PIC = "hd picture"
-
-IP_ADDRESS = "192.168.0.105"
+IP_ADDRESS = "192.168.1.172"
 PORT_HD = 9000
 PORT_STREAM = 9999
 
@@ -71,12 +70,12 @@ class take_hd_image_state:
         self.cap = cv2.VideoCapture("tcp://"+IP_ADDRESS+":"+str(PORT_HD))
         work, img = self.cap.read()
 
-        K = np.array([[2.55734713e+03, 0, 1.66221758e+03],
-                      [0., 2.55828222e+03, 1.17670281e+03],
+        K = np.array([[2.589484213596329482e+03, 0, 1.698729966864577591e+03],
+                      [0., 2.598980566720857951e+03, 1.228227272486119546e+03],
                       [0., 0., 1.]])
 
         #Define distortion coefficients d
-        d = np.array([0.18400666, -0.55359429, -0.00706629, -0.00137952, 0.43185508])
+        d = np.array([1.808684126195871100e-01,-4.092267392141504811e-01,7.927461711566604480e-03,1.114186232525689975e-03,2.145718416518574423e-01])
 
         (h, w) = img.shape[:2]
 
@@ -241,15 +240,13 @@ class transform_correction_image_state:
                 self.list_position.append((x, y))
             else:
 
-                self.list_position.append((x, y))
-                
                 dx = self.list_position[1][0] - self.list_position[0][0]
                 dy = self.list_position[1][1] - self.list_position[0][1]
 
                 print "etape 1"
                 print self.list_position
 
-                #self.list_position.append((self.list_position[-1][0] - dx, self.list_position[-1][1] - dy))
+                self.list_position.append((self.list_position[-1][0] - dx, self.list_position[-1][1] - dy))
 
                 print "etape 2"
                 print self.list_position
@@ -274,7 +271,7 @@ class transform_correction_image_state:
                 app_state.push_state(deuxD_figur_state(self.full_img_hd, self.img_warp))
 
         elif(event == cv2.EVENT_RBUTTONDOWN):
-            app_state.push_state(default_state())
+            app_state.push_state(crop_image_state(self.img_hd))
 
 
     def exit(self):
