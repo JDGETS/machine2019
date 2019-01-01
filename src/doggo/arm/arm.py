@@ -174,7 +174,7 @@ class Arm:
         '''
         loads = []
 
-        for i in [1, 2, 4, 5]:
+        for i in [1, 2, 4, 5, 8]:
             present_load = self.dyn_chain.get_reg(i, "present_load")
             ratio = (present_load & 1023) / 1023.0
             direction = ((present_load >> 10) & 1) * 2 - 1
@@ -245,6 +245,12 @@ class Arm:
             'temp': self.dyn_chain.get_reg(3, 'present_temp'),
             'load': loads[1],
             'present_pos': positions[1]
+        }
+
+        dyn_infos['motor8'] = {
+            'temp': self.dyn_chain.get_reg(8, 'present_temp'),
+            'load': loads[4],
+            'present_pos': 0
         }
 
         return dyn_infos
