@@ -147,87 +147,87 @@ class gamepadloop(Thread):
             except inputs.UnpluggedError:
                 break
 
-                #print("Pas de manette connectee")
-                for event in events:
-
-                    # Controle d'evenements et actions avec les boutons
-                    if event.ev_type == "Key":
-
-                        # Bouton A : rotation camera
-                        if event.code == 'BTN_SOUTH' and event.state == 1:
-                            global rotated_servo
-                            rotated_servo = not rotated_servo
-                            servo_180(rotated_servo)
-                            print "hello"
-
-                        elif event.code == "BTN_TR":
-                            global luminosity
-                            luminosity += luminosity_step
-                            write_pwm(config.get_param('light_channel'), luminosity)
-
-                        elif event.code == "BTN_TL":
-                            global luminosity
-                            luminosity -= luminosity_step
-                            write_pwm(config.get_param('light_channel'), luminosity)
-
-                    # Controle du mouvement avec joysticks et trigger
-                    if event.ev_type == "Absolute":
-
-                        # Si le right trigger est enfonce : controle du robot
-                        if event.code == "ABS_RZ" and event.state == 255:
-                            self.right_trigger = True
-
-                        # Si le right trigger est relache
-                        elif event.code == "ABS_RZ" and event.state < 200:
-                            self.right_trigger = False
-                            if 'forward' in pad_keys:
-                                del pad_keys['forward']
-                            if 'backward' in pad_keys:
-                                del pad_keys['backward']
-                            if 'left' in pad_keys:
-                                del pad_keys['left']
-                            if 'right' in pad_keys:
-                                del pad_keys['right']
-
-                        # left joystick Y
-                        elif event.code == "ABS_Y":
-                            if event.state > JOYSTICK_IGNORE_THRESHOLD and self.right_trigger:
-                                if 'forward' in pad_keys:
-                                    del pad_keys['forward']
-
-                                pad_keys['backward'] = 1
-
-                            elif event.state < -JOYSTICK_IGNORE_THRESHOLD and self.right_trigger:
-                                if 'backward' in pad_keys:
-                                    del pad_keys['backward']
-
-                                pad_keys['forward'] = 1
-
-                            else:
-                                if 'forward' in pad_keys:
-                                    del pad_keys['forward']
-                                if 'backward' in pad_keys:
-                                    del pad_keys['backward']
-
-                        # right joystick X
-                        elif event.code == "ABS_RX":
-                            if event.state > JOYSTICK_IGNORE_THRESHOLD and self.right_trigger:
-                                if 'left' in pad_keys:
-                                    del pad_keys['left']
-
-                                pad_keys['right'] = 1
-
-                            elif event.state < -JOYSTICK_IGNORE_THRESHOLD and self.right_trigger:
-                                if 'right' in pad_keys:
-                                    del pad_keys['right']
-
-                                pad_keys['left'] = 1
-
-                            else:
-                                if 'left' in pad_keys:
-                                    del pad_keys['left']
-                                if 'right' in pad_keys:
-                                    del pad_keys['right']
+            # #print("Pas de manette connectee")
+            # for event in events:
+            #
+            #     # Controle d'evenements et actions avec les boutons
+            #     if event.ev_type == "Key":
+            #
+            #         # Bouton A : rotation camera
+            #         if event.code == 'BTN_SOUTH' and event.state == 1:
+            #             global rotated_servo
+            #             rotated_servo = not rotated_servo
+            #             servo_180(rotated_servo)
+            #             print "hello"
+            #
+            #         elif event.code == "BTN_TR":
+            #             global luminosity
+            #             luminosity += luminosity_step
+            #             write_pwm(config.get_param('light_channel'), luminosity)
+            #
+            #         elif event.code == "BTN_TL":
+            #             global luminosity
+            #             luminosity -= luminosity_step
+            #             write_pwm(config.get_param('light_channel'), luminosity)
+            #
+            #     # Controle du mouvement avec joysticks et trigger
+            #     if event.ev_type == "Absolute":
+            #
+            #         # Si le right trigger est enfonce : controle du robot
+            #         if event.code == "ABS_RZ" and event.state == 255:
+            #             self.right_trigger = True
+            #
+            #         # Si le right trigger est relache
+            #         elif event.code == "ABS_RZ" and event.state < 200:
+            #             self.right_trigger = False
+            #             if 'forward' in pad_keys:
+            #                 del pad_keys['forward']
+            #             if 'backward' in pad_keys:
+            #                 del pad_keys['backward']
+            #             if 'left' in pad_keys:
+            #                 del pad_keys['left']
+            #             if 'right' in pad_keys:
+            #                 del pad_keys['right']
+            #
+            #         # left joystick Y
+            #         elif event.code == "ABS_Y":
+            #             if event.state > JOYSTICK_IGNORE_THRESHOLD and self.right_trigger:
+            #                 if 'forward' in pad_keys:
+            #                     del pad_keys['forward']
+            #
+            #                 pad_keys['backward'] = 1
+            #
+            #             elif event.state < -JOYSTICK_IGNORE_THRESHOLD and self.right_trigger:
+            #                 if 'backward' in pad_keys:
+            #                     del pad_keys['backward']
+            #
+            #                 pad_keys['forward'] = 1
+            #
+            #             else:
+            #                 if 'forward' in pad_keys:
+            #                     del pad_keys['forward']
+            #                 if 'backward' in pad_keys:
+            #                     del pad_keys['backward']
+            #
+            #         # right joystick X
+            #         elif event.code == "ABS_RX":
+            #             if event.state > JOYSTICK_IGNORE_THRESHOLD and self.right_trigger:
+            #                 if 'left' in pad_keys:
+            #                     del pad_keys['left']
+            #
+            #                 pad_keys['right'] = 1
+            #
+            #             elif event.state < -JOYSTICK_IGNORE_THRESHOLD and self.right_trigger:
+            #                 if 'right' in pad_keys:
+            #                     del pad_keys['right']
+            #
+            #                 pad_keys['left'] = 1
+            #
+            #             else:
+            #                 if 'left' in pad_keys:
+            #                     del pad_keys['left']
+            #                 if 'right' in pad_keys:
+            #                     del pad_keys['right']
 
 
 class gpioloop(Thread):
@@ -285,9 +285,6 @@ class gpioloop(Thread):
 
             # self.motor_left_actual_speed = self.motor_left_target_speed
             # self.motor_right_actual_speed = self.motor_right_target_speed
-
-            self.motor_left_actual_speed *= config.get_param('speed_motor_left')
-            self.motor_right_actual_speed *= config.get_param('speed_motor_right')
 
             if self.motor_left_actual_speed < 0:
                 write_pwm([config.get_param('motor_left_back_channel')], abs(self.motor_left_actual_speed))
