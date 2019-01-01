@@ -192,11 +192,11 @@ class ArmPickupState(State):
         # place le bonhomme un peu trop bas
         # ancien : 616, 421, 560, 198
         # 594, 401, 590, 200
-        state_manager.arm.write_goal(616, 465, 527, 193, speed=100)
+        state_manager.arm.write_goal(616, 451, 537, 199, speed=100)
         state_manager.wait_stopped()
 
         # rotate a bit
-        state_manager.arm.write_single_goal(1, 495, speed=150)
+        state_manager.arm.write_single_goal(1, 490, speed=150)
         state_manager.wait_stopped()
 
         # switch to manual
@@ -221,10 +221,10 @@ class PickupCrochetState(State):
         State.__init__(self)
         self.number = number
         self.crochets = {
-            1: [(928, 418, 771, 369), (928, 449, 775, 410)],
+            1: [(928, 418, 771, 369), (928, 454, 774, 430)],
             2: [(871, 405, 781, 373), (871, 440, 788, 420)],
-            3: [(817, 405, 781, 373), (817, 419, 794, 404)],
-            4: [(772, 405, 781, 373), (772, 436, 785, 402)],
+            3: [(817, 405, 781, 373), (817, 418, 798, 421)],
+            4: [(772, 405, 781, 373), (772, 421, 796, 417)],
             5: [(100, 429, 771, 399), (100, 470, 773, 439)],
             6: [(149, 417, 786, 403), (149, 459, 783, 424)],
             7: [(192, 391, 796, 398), (192, 442, 795, 453)],
