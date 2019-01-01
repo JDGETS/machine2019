@@ -82,7 +82,7 @@ def keydown(e):
         rotated_servo = not rotated_servo
 
         master.after(500, lambda: gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0))
-        
+
 
     if e.char == 'j':
         gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0)
@@ -105,7 +105,7 @@ def keyup(e):
 def main():
     global luminosity, gpio, w, running, master
 
-    ip = config.get_param('ip') 
+    ip = config.get_param('ip')
     gpio = pigpio.pi(ip)
 
     master = Tk()
@@ -266,12 +266,12 @@ class gpioloop(Thread):
                 self.motor_right_target_speed = -backwards_mov_speed
 
             elif 'a' in keys or 'right' in pad_keys:
-                self.motor_left_target_speed = rotation_speed
-                self.motor_right_target_speed = -rotation_speed
+                self.motor_left_actual_speed = self.motor_left_target_speed = rotation_speed
+                self.motor_right_actual_speed = self.motor_right_target_speed = -rotation_speed
 
             elif 'd' in keys or 'left' in pad_keys:
-                self.motor_left_target_speed = -rotation_speed
-                self.motor_right_target_speed = rotation_speed
+                self.motor_left_actual_speed = self.motor_left_target_speed = -rotation_speed
+                self.motor_right_actual_speed = self.motor_right_target_speed = rotation_speed
 
             else:
                 self.motor_left_target_speed = 0
