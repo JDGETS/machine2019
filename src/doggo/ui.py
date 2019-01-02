@@ -22,6 +22,7 @@ pad_keys = {}
 states = {}
 grip_state = True
 speed_mode = False
+detendre_mode = False
 
 JOYSTICK_IGNORE_THRESHOLD = 32000
 
@@ -82,8 +83,13 @@ def keydown(e):
         arm.set_tyro_manager_state('tendre')
 
     if e.char == 'c':
-        print 'detendre continuellement'
-        arm.set_tyro_manager_state('detendre-continu')
+        global detendre_mode
+        detendre_mode = not detendre_mode
+
+        if detendre_mode:
+            arm.set_tyro_manager_state('detendre-continu')
+        else:
+            arm.set_tyro_manager_state('stop')
 
 
 def write_pwm(pins, value):
@@ -98,9 +104,6 @@ def write_pwm(pins, value):
 def keyup(e):
     if e.char in keys:
         del keys[e.char]
-
-    if e.char == 'c':
-        arm.set_tyro_manager_state('stop')
 
 
 def handle_reset_torque():

@@ -64,4 +64,10 @@ class TyroManager(Thread):
     def detendre_continu(self):
         if not self.moving:
             self.moving = True
+            self.start_time = time.time()
             self.chain.set_reg(self.motor_id, 'moving_speed', self.DETENDRE_SPEED)
+
+        # protection pour arreter de detendre apres x temps
+        if (time.time() - self.start_time) > 100:
+            self.state = 'stop'
+            self.moving = False
