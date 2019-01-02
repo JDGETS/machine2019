@@ -82,8 +82,6 @@ def keydown(e):
         arm.set_tyro_manager_state('tendre')
 
     if e.char == 'c':
-        keys['c'] = 1
-
         print 'detendre continuellement'
         arm.set_tyro_manager_state('detendre-continu')
 
@@ -559,9 +557,6 @@ class gpioloop(Thread):
             elif 'a' in keys or 'left' in pad_keys:
                 self.motor_left_target_speed = -rotation_speed
                 self.motor_right_target_speed = rotation_speed
-
-            elif 'c' in keys:
-                arm.set_tyro_manager_state('detendre-continu')
 
             else:
                 self.motor_left_target_speed = 0
