@@ -7,11 +7,11 @@ if sys.argv[1] == 'doggo':
     import doggo
     doggo.main()
 
-elif sys.argv[1] == 'pupper1':
+elif sys.argv[1] == 'pupperblack':
     import pupper
     pupper.main(sys.argv[1])
 
-elif sys.argv[1] == 'pupper2':
+elif sys.argv[1] == 'pupperred':
     import pupper
     pupper.main(sys.argv[1])
 
