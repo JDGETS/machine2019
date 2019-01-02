@@ -69,6 +69,6 @@ class TyroManager(Thread):
             self.chain.set_reg(self.motor_id, 'moving_speed', self.DETENDRE_SPEED)
 
         if (time.time() - self.start_time) > 5:
-            self.state = 'manuel'
+            self.state = 'stop'
             self.moving = False
             self.chain.set_reg(self.motor_id, 'moving_speed', 0)
