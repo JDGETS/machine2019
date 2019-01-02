@@ -73,12 +73,6 @@ def keydown(e):
         arm.disable_all()
         print arm.get_position()
 
-    if e.char == 'c':
-        print 'pickup'
-
-    if e.char == 'v':
-        print 'release'
-
     if e.char == 'x':
         print 'detetendre'
         arm.set_tyro_manager_state('detendre')
@@ -86,6 +80,12 @@ def keydown(e):
     if e.char == 'z':
         print 'tendre'
         arm.set_tyro_manager_state('tendre')
+
+    if e.char == 'c':
+        keys['c'] = 1
+
+        print 'detendre continuellement'
+        arm.set_tyro_manager_state('detendre-continu')
 
 
 def write_pwm(pins, value):
@@ -100,6 +100,9 @@ def write_pwm(pins, value):
 def keyup(e):
     if e.char in keys:
         del keys[e.char]
+
+    if e.char == 'c':
+        arm.set_tyro_manager_state('manuel')
 
 
 def handle_reset_torque():
@@ -556,6 +559,10 @@ class gpioloop(Thread):
             elif 'a' in keys or 'left' in pad_keys:
                 self.motor_left_target_speed = -rotation_speed
                 self.motor_right_target_speed = rotation_speed
+
+            elif 'c' in keys:
+                arm.set_tyro_manager_state('detendre-continu')
+
             else:
                 self.motor_left_target_speed = 0
                 self.motor_right_target_speed = 0

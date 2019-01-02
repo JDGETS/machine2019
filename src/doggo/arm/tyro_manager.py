@@ -25,6 +25,8 @@ class TyroManager(Thread):
                 self.detendre()
             elif self.state == 'tendre':
                 self.tendre()
+            elif self.state == 'detendre-continu':
+                self.detendre_continu()
             else:
                 pass
 
@@ -54,6 +56,17 @@ class TyroManager(Thread):
             self.chain.set_reg(self.motor_id, 'moving_speed', self.TENDRE_SPEED + 1024)
 
         if (time.time() - self.start_time) > 0.2 and speed <= 40:
+            self.state = 'manuel'
+            self.moving = False
+            self.chain.set_reg(self.motor_id, 'moving_speed', 0)
+
+    def detendre_continu(self):
+        if not self.moving:
+            self.start_time = time.time()
+            self.moving = True
+            self.chain.set_reg(self.motor_id, 'moving_speed', self.DETENDRE_SPEED)
+
+        if (time.time() - self.start_time) > 5:
             self.state = 'manuel'
             self.moving = False
             self.chain.set_reg(self.motor_id, 'moving_speed', 0)
