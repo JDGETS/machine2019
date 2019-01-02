@@ -26,8 +26,6 @@ class TyroManager(Thread):
                 self.tendre()
             elif self.state == 'detendre-manuel':
                 self.detendre_manuel()
-            elif self.state == 'stop':
-                self.chain.set_reg(self.motor_id, 'moving_speed', 0)
             else:
                 pass
 
@@ -72,4 +70,3 @@ class TyroManager(Thread):
         time.sleep(seconds)
         self.chain.set_reg(self.motor_id, 'moving_speed', 0)
         self.moving = False
-        self.state = 'stop'
