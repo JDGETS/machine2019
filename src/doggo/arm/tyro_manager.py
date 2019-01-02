@@ -27,6 +27,8 @@ class TyroManager(Thread):
                 self.tendre()
             elif self.state == 'detendre-continu':
                 self.detendre_continu()
+            elif self.state == 'stop':
+                self.chain.set_reg(self.motor_id, 'moving_speed', 0)
             else:
                 pass
 

@@ -102,7 +102,7 @@ def keyup(e):
         del keys[e.char]
 
     if e.char == 'c':
-        arm.set_tyro_manager_state('manuel')
+        arm.set_tyro_manager_state('stop')
 
 
 def handle_reset_torque():
