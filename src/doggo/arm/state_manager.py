@@ -97,11 +97,14 @@ class ArmManuelState(State):
     ARM_WRIST_STEP = 5
     HOME = [85, 230, -18]
 
-    def __init__(self):
+    def __init__(self, initial_position=None):
         State.__init__(self)
         self.state_manager = None
         self.base_direction = 0
-        self.position_2d = self.HOME
+        if initial_position:
+            self.position_2d = initial_position
+        else:
+            self.position_2d = self.HOME
         self.frame = 0
         self.last_update = -10
 
@@ -259,6 +262,20 @@ class PickupCrochetState(State):
         state_manager.wait_stopped()
 
         state_manager.stop()
+
+
+class ArmShafterState(State):
+    def update(self, state_manager):
+        state_manager.arm.write_single_goal(2, 229, speed=150)
+        state_manager.wait_stopped()
+
+        state_manager.arm.write_single_goal(4, 480, speed=150)
+        state_manager.wait_stopped()
+
+        state_manager.arm.goto2D(75, 390, 0)
+        state_manager.wait_stopped()
+
+        state_manager.set_state(ArmManuelState([75, 390, 0]))
 
 
 class TestState(State):

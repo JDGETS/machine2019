@@ -128,6 +128,9 @@ def handle_crochet(number):
 
     return handler
 
+def handle_shafter():
+    sm.set_state(ArmShafterState())
+
 
 def init_ui(master):
 
@@ -142,6 +145,7 @@ def init_ui(master):
     Button(master, text="Apporter a tyrolienne", command=handle_apporter_tyro).grid(row=2, column=1)
     Button(master, text="Lacher", command=handle_lacher).grid(row=2, column=2)
     Button(master, text="Home", command=handle_home).grid(row=2, column=3)
+    Button(master, text="SHAFTER", command=handle_shafter).grid(row=2, column=4)
 
     Label(master, text="CROCHETS", bg="BLACK", fg="white").grid(row=3, column=0)
     for i in range(4):
