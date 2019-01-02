@@ -23,6 +23,7 @@ states = {}
 grip_state = True
 speed_mode = False
 detendre_mode = False
+tendre_mode = False
 
 JOYSTICK_IGNORE_THRESHOLD = 32000
 
@@ -88,6 +89,15 @@ def keydown(e):
 
         if detendre_mode:
             arm.set_tyro_manager_state('detendre-manuel')
+        else:
+            arm.set_tyro_manager_state('stop')
+
+    if e.char == 'v':
+        global tendre_mode
+        tendre_mode = not tendre_mode
+
+        if tendre_mode:
+            arm.set_tyro_manager_state('tendre-manuel')
         else:
             arm.set_tyro_manager_state('stop')
 
