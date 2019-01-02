@@ -37,6 +37,8 @@ pupper1_servo_camera_front = 500
 pupper1_servo_camera_back = 2300
 pupper1_speed_motor_right = 100
 pupper1_speed_motor_left = 100
+pupper1_matrix_calibration_camera = [[2.589484213596329482e+03, 0, 1.698729966864577591e+03],[0., 2.598980566720857951e+03, 1.228227272486119546e+03], [0., 0., 1.]]
+pupper1_coefficient_distortion = [1.808684126195871100e-01,-4.092267392141504811e-01,7.927461711566604480e-03,1.114186232525689975e-03,2.145718416518574423e-01]
 
 # PUPPER2
 pupper2_ip = '192.168.1.172'
@@ -54,3 +56,5 @@ pupper2_servo_camera_front = 500
 pupper2_servo_camera_back = 2300
 pupper2_speed_motor_right = 100
 pupper2_speed_motor_left = 100
+pupper2_matrix_calibration_camera = [[2.589484213596329482e+03, 0, 1.698729966864577591e+03],[0., 2.598980566720857951e+03, 1.228227272486119546e+03], [0., 0., 1.]]
+pupper2_coefficient_distortion = [1.808684126195871100e-01,-4.092267392141504811e-01,7.927461711566604480e-03,1.114186232525689975e-03,2.145718416518574423e-01]
