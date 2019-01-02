@@ -87,7 +87,7 @@ def keydown(e):
         detendre_mode = not detendre_mode
 
         if detendre_mode:
-            arm.set_tyro_manager_state('detendre-continu')
+            arm.set_tyro_manager_state('detendre-manuel')
         else:
             arm.set_tyro_manager_state('stop')
 
