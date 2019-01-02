@@ -112,9 +112,8 @@ def write_pwm(pins, value):
         if pin not in states or states[pin] != value:
             states[pin] = value
 
-            #print ('write', pin, value)
+            print ('write', pin, value)
             gpio.set_PWM_dutycycle(pin, value)
-
 
 def keyup(e):
     if e.char in keys:
@@ -299,24 +298,49 @@ class gpioloop(Thread):
                 self.motor_left_target_speed = forward_mov_speed
                 self.motor_right_target_speed = forward_mov_speed
 
+                if self.motor_left_target_speed < config.get_param('start_speed'):
+                    self.motor_left_target_speed = config.get_param('start_speed')
+                if self.motor_right_target_speed < config.get_param('start_speed'):
+                    self.motor_right_target_speed = config.get_param('start_speed')
+
             elif 'e' in keys:
                 self.motor_right_target_speed = forward_mov_speed
                 self.motor_left_target_speed = 0
+                if self.motor_right_target_speed < config.get_param('start_speed'):
+                    self.motor_right_target_speed = config.get_param('start_speed')
+
             elif 'q' in keys:
                 self.motor_left_target_speed = forward_mov_speed
                 self.motor_right_target_speed = 0
+                if self.motor_left_target_speed < config.get_param('start_speed'):
+                    self.motor_left_target_speed = config.get_param('start_speed')
 
             elif 's' in keys or 'backward' in pad_keys:
                 self.motor_left_target_speed = -backwards_mov_speed
                 self.motor_right_target_speed = -backwards_mov_speed
 
+                if self.motor_left_target_speed > -config.get_param('start_speed'):
+                    self.motor_left_target_speed = -config.get_param('start_speed')
+                if self.motor_right_target_speed > -config.get_param('start_speed'):
+                    self.motor_right_target_speed = -config.get_param('start_speed')
+
             elif 'd' in keys or 'right' in pad_keys:
                 self.motor_left_target_speed = rotation_speed
                 self.motor_right_target_speed = -rotation_speed
 
+                if self.motor_left_target_speed < config.get_param('start_speed'):
+                    self.motor_left_target_speed = config.get_param('start_speed')
+                if self.motor_right_target_speed > -config.get_param('start_speed'):
+                    self.motor_right_target_speed = -config.get_param('start_speed')
+
             elif 'a' in keys or 'left' in pad_keys:
                 self.motor_left_target_speed = -rotation_speed
                 self.motor_right_target_speed = rotation_speed
+
+                if self.motor_left_target_speed > -config.get_param('start_speed'):
+                    self.motor_left_target_speed = -config.get_param('start_speed')
+                if self.motor_right_target_speed < config.get_param('start_speed'):
+                    self.motor_right_target_speed = config.get_param('start_speed')
 
             elif 'z' in keys:
                 self.motor_left_target_speed = -2*backwards_mov_speed
