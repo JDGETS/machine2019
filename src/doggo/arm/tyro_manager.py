@@ -55,7 +55,7 @@ class TyroManager(Thread):
             self.start_time = time.time()
             self.moving = True
             self.chain.set_reg(self.motor_id, 'moving_speed', self.TENDRE_SPEED + 1024)
-            self.stop_tyro_after(1)
+            self.stop_tyro_after(0.250)
 
         if (time.time() - self.start_time) > 0.2 and speed <= 40:
             self.state = 'manuel'
@@ -63,10 +63,13 @@ class TyroManager(Thread):
             self.chain.set_reg(self.motor_id, 'moving_speed', 0)
 
     def detendre_manuel(self):
-        self.chain.set_reg(self.motor_id, 'moving_speed', self.DETENDRE_SPEED)
-        self.stop_tyro_after(1)
+        if not self.moving:
+            self.moving = True
+            self.chain.set_reg(self.motor_id, 'moving_speed', self.DETENDRE_SPEED)
+            self.stop_tyro_after(0.250)
 
     def stop_tyro_after(self, seconds):
         time.sleep(seconds)
         self.chain.set_reg(self.motor_id, 'moving_speed', 0)
+        self.moving = False
         self.state = 'stop'
