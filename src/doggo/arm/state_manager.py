@@ -185,8 +185,15 @@ class ArmHomeState(State):
 class ArmPickupState(State):
     def update(self, state_manager):
         # simba
-        state_manager.arm.write_goal_without_base(225, 483, 191, speed=100)
+        state_manager.arm.write_single_goal(2, 229, speed=100)
         state_manager.wait_stopped()
+
+        state_manager.arm.write_single_goal(4, 480, speed=100)
+        state_manager.arm.write_single_goal(5, 191, speed=100)
+        state_manager.wait_stopped()
+
+        # state_manager.arm.write_goal_without_base(225, 483, 191, speed=100)
+        # state_manager.wait_stopped()
 
         # rotate base
         state_manager.arm.write_single_goal(1, 616, speed=250)
