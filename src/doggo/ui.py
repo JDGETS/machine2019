@@ -94,6 +94,13 @@ def keydown(e):
         arm.set_tyro_manager_state('tendre-manuel')
 
 
+    if e.char == 'l':
+        global speed_mode
+        speed_mode = not speed_mode
+        change_speed(speed_mode)
+        print 'speed_mode = ' + str(speed_mode)
+
+
 def write_pwm(pins, value):
     for pin in pins:
         if pin not in states or states[pin] != value:
@@ -141,7 +148,6 @@ def handle_shafter():
 
 def handle_avant():
     sm.set_state(ArmForwardState())
-
 
 def init_ui(master):
 

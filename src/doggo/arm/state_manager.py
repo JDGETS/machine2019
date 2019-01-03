@@ -318,3 +318,12 @@ class TestState(State):
                 state_manager.arm.goto2D(230, 120, 0, speed=150)
 
             state_manager.wait_stopped()
+
+
+class ArmCasseState(State):
+    def update(self, state_manager):
+        state_manager.arm.write_goal(92, 392, 478, 368, speed=[80, 75, 120, 75])
+        state_manager.wait_stopped()
+
+        state_manager.arm.write_goal(291, 300, 765, 579, speed=[80, 75, 120, 75])
+        state_manager.wait_stopped()
