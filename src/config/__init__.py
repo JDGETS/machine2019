@@ -56,5 +56,5 @@ pupperred_servo_camera_front = 500
 pupperred_servo_camera_back = 2300
 pupperred_speed_motor_right = 100
 pupperred_speed_motor_left = 100
-pupperred_matrix_calibration_camera = [[2.589484213596329482e+03, 0, 1.698729966864577591e+03],[0., 2.598980566720857951e+03, 1.228227272486119546e+03], [0., 0., 1.]]
-pupperred_coefficient_distortion = [1.808684126195871100e-01,-4.092267392141504811e-01,7.927461711566604480e-03,1.114186232525689975e-03,2.145718416518574423e-01]
+pupperred_matrix_calibration_camera = [[2.59970376e+03, 0, 1.66710857e+03],[0, 2.61837181e+03, 1.20139396e+03], [0., 0., 1.]]
+pupperred_coefficient_distortion = [0.20709837, -0.51214243, 0.00323797, -0.00125799, 0.3661233]
