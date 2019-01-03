@@ -85,10 +85,12 @@ def keydown(e):
         arm.set_tyro_manager_state('tendre')
 
     if e.char == 'c':
+        print 'detendre un ti peu'
         arm.set_tyro_manager_state('detendre-manuel')
 
 
     if e.char == 'v':
+        print 'tendre un ti peu'
         arm.set_tyro_manager_state('tendre-manuel')
 
 

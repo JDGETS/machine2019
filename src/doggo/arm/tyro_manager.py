@@ -79,4 +79,4 @@ class TyroManager(Thread):
         time.sleep(seconds)
         self.chain.set_reg(self.motor_id, 'moving_speed', 0)
         self.moving = False
-        self.state = 'stop'
+        self.state = 'manual'
