@@ -29,17 +29,19 @@ pupperblack_motor_right_for_channel = 17
 pupperblack_motor_right_back_channel = 27
 pupperblack_light_channel = 5
 pupperblack_servo_camera_channel = 13
-pupperblack_for_speed = 84
-pupperblack_start_speed = 28
-pupperblack_back_speed = 49
-pupperblack_rotation_speed = 49
-pupperblack_acceleration_ratio = 7
+pupperblack_for_speed = 80
+pupperblack_start_speed = 25
+pupperblack_back_speed = 50
+pupperblack_rotation_speed = 40
+pupperblack_acceleration_ratio = 5
 pupperblack_servo_camera_front = 500
 pupperblack_servo_camera_back = 2300
 pupperblack_speed_motor_right = 100
 pupperblack_speed_motor_left = 100
-pupperblack_matrix_calibration_camera = [[2.589484213596329482e+03, 0, 1.698729966864577591e+03],[0., 2.598980566720857951e+03, 1.228227272486119546e+03], [0., 0., 1.]]
-pupperblack_coefficient_distortion = [1.808684126195871100e-01,-4.092267392141504811e-01,7.927461711566604480e-03,1.114186232525689975e-03,2.145718416518574423e-01]
+pupperblack_matrix_calibration_camera = [[2.66532771e+03 , 0, 1.65409753e+03],[0., 2.68051854e+03, 1.28351369], [0., 0., 1.]]
+pupperblack_coefficient_distortion = [2.03037321e-01, -5.23293542e-01, 1.61915030e-03, -6.55318926e-05, 3.99905335e-01]
+
+
 
 # PUPPER RED
 pupperred_ip = '192.168.1.172'

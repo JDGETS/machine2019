@@ -298,49 +298,25 @@ class gpioloop(Thread):
                 self.motor_left_target_speed = forward_mov_speed
                 self.motor_right_target_speed = forward_mov_speed
 
-                if self.motor_left_target_speed < config.get_param('start_speed'):
-                    self.motor_left_target_speed = config.get_param('start_speed')
-                if self.motor_right_target_speed < config.get_param('start_speed'):
-                    self.motor_right_target_speed = config.get_param('start_speed')
-
             elif 'e' in keys:
                 self.motor_right_target_speed = forward_mov_speed
                 self.motor_left_target_speed = 0
-                if self.motor_right_target_speed < config.get_param('start_speed'):
-                    self.motor_right_target_speed = config.get_param('start_speed')
 
             elif 'q' in keys:
                 self.motor_left_target_speed = forward_mov_speed
                 self.motor_right_target_speed = 0
-                if self.motor_left_target_speed < config.get_param('start_speed'):
-                    self.motor_left_target_speed = config.get_param('start_speed')
 
             elif 's' in keys or 'backward' in pad_keys:
                 self.motor_left_target_speed = -backwards_mov_speed
                 self.motor_right_target_speed = -backwards_mov_speed
 
-                if self.motor_left_target_speed > -config.get_param('start_speed'):
-                    self.motor_left_target_speed = -config.get_param('start_speed')
-                if self.motor_right_target_speed > -config.get_param('start_speed'):
-                    self.motor_right_target_speed = -config.get_param('start_speed')
-
             elif 'd' in keys or 'right' in pad_keys:
                 self.motor_left_target_speed = rotation_speed
                 self.motor_right_target_speed = -rotation_speed
 
-                if self.motor_left_target_speed < config.get_param('start_speed'):
-                    self.motor_left_target_speed = config.get_param('start_speed')
-                if self.motor_right_target_speed > -config.get_param('start_speed'):
-                    self.motor_right_target_speed = -config.get_param('start_speed')
-
             elif 'a' in keys or 'left' in pad_keys:
                 self.motor_left_target_speed = -rotation_speed
                 self.motor_right_target_speed = rotation_speed
-
-                if self.motor_left_target_speed > -config.get_param('start_speed'):
-                    self.motor_left_target_speed = -config.get_param('start_speed')
-                if self.motor_right_target_speed < config.get_param('start_speed'):
-                    self.motor_right_target_speed = config.get_param('start_speed')
 
             elif 'z' in keys:
                 self.motor_left_target_speed = -2*backwards_mov_speed
@@ -349,7 +325,6 @@ class gpioloop(Thread):
             elif 'f' in keys:
                 self.motor_left_target_speed = boost_forward_speed
                 self.motor_right_target_speed = boost_forward_speed
-
             else:
                 self.motor_left_target_speed = 0
                 self.motor_right_target_speed = 0
@@ -580,26 +555,13 @@ class transform_correction_image_state:
                 dx = self.list_position[1][0] - self.list_position[0][0]
                 dy = self.list_position[1][1] - self.list_position[0][1]
 
-                print "etape 1"
-                print self.list_position
-
                 self.list_position.append((self.list_position[-1][0] - dx, self.list_position[-1][1] - dy))
 
-                print "etape 2"
-                print self.list_position
-
                 self.list_position = [(self.mx + x / 3.0, self.my + y / 3.0) for (x, y) in self.list_position]
-
-                print "etape 3"
-                print self.list_position
 
                 target_position = [(8 * PIXEL_BY_INCHE, 2464 - PIXEL_BY_INCHE), (8 * PIXEL_BY_INCHE, 2464), 
                         (10 * PIXEL_BY_INCHE, 2464), (10 * PIXEL_BY_INCHE, 2464 - PIXEL_BY_INCHE)]
 
-                print "etape 1"
-                print target_position
-
-                print len(self.list_position), len(target_position)
 
                 h = cv2.getPerspectiveTransform(np.array([self.list_position], dtype="float32"), np.array([target_position], dtype="float32"))
                 self.img_warp = cv2.warpPerspective(self.full_img_hd, h, (3280, 2464))
@@ -639,14 +601,13 @@ class deuxD_figur_state:
             print(self.list_position)
 
             if(len(self.list_position) >= 2):
-                vert_dist = float(abs(self.list_position[1][0] - self.list_position[0][0]))
-                hori_dist = float(abs(self.list_position[1][1] - self.list_position[0][1]))
+                hori_dist = float(abs(self.list_position[1][0] - self.list_position[0][0]))
+                vert_dist = float(abs(self.list_position[1][1] - self.list_position[0][1]))
 
                 #Divide distance by 2 because it's work like that
                 vert_dist = vert_dist/2
                 hori_dist = hori_dist/2
 
-                print("Pixel dist| vert: " + str(vert_dist) + "  hori: " + str(hori_dist))
                 print("Inches dist| vert: " + str(vert_dist / PIXEL_BY_INCHE) + "  hori: " + str(hori_dist/ PIXEL_BY_INCHE))
                     
                 self.list_position[:] = []
