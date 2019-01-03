@@ -42,6 +42,7 @@ JOYSTICK_IGNORE_THRESHOLD = 32000
 forward_mov_speed = config.get_param('for_speed')
 backwards_mov_speed = config.get_param('back_speed')
 rotation_speed = config.get_param('rotation_speed')
+boost_forward_speed = config.get_param('boost_speed')
 
 servo_camera_front = config.get_param('servo_camera_front')
 servo_camera_back = config.get_param('servo_camera_back')
@@ -320,6 +321,10 @@ class gpioloop(Thread):
             elif 'z' in keys:
                 self.motor_left_target_speed = -2*backwards_mov_speed
                 self.motor_right_target_speed = -2*backwards_mov_speed
+
+            elif 'f' in keys:
+                self.motor_left_target_speed = boost_forward_speed
+                self.motor_right_target_speed = boost_forward_speed
 
             else:
                 self.motor_left_target_speed = 0
