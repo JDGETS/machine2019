@@ -569,9 +569,8 @@ class transform_correction_image_state:
     def on_click(self, event, x, y, flags, nb_click):
         if(event == cv2.EVENT_LBUTTONDOWN):
             print (x, y)
-            if len(self.list_position) != 3:
-                self.list_position.append((x, y))
-            else:
+            self.list_position.append((x, y))
+            if len(self.list_position) == 3:
 
                 dx = self.list_position[1][0] - self.list_position[0][0]
                 dy = self.list_position[1][1] - self.list_position[0][1]
