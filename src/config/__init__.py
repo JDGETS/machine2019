@@ -30,6 +30,7 @@ pupperblack_motor_right_back_channel = 27
 pupperblack_light_channel = 5
 pupperblack_servo_camera_channel = 13
 pupperblack_for_speed = 80
+pupperblack_boost_speed = 150
 pupperblack_start_speed = 25
 pupperblack_back_speed = 50
 pupperblack_rotation_speed = 40

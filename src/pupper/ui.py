@@ -11,6 +11,8 @@ import pyzbar.pyzbar as pyzbar
 import cv2
 import os
 
+val_servo= 500
+
 WINDOW_NAME_HD_PIC = "hd picture"
 
 PIXEL_BY_INCHE = 80.0
@@ -87,15 +89,31 @@ def keydown(e):
 
     gpio.set_PWM_dutycycle(5, light_value)
 
+    if e.char == 'p':
+        global val_servo
+        if(val_servo <= 2450):
+            val_servo += 50
+            gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), val_servo)
+            master.after(100, lambda: gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0))
+
+    if e.char == 'o':
+        global val_servo
+        if(val_servo >= 550):
+            val_servo -= 50
+            gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), val_servo)
+            master.after(100, lambda: gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), 0))
+
     if e.char == 'k':
 
         if rotated_servo:
             print "low"
             gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), servo_camera_front)
+            val_servo = servo_camera_front
             #gpio.hardware_PWM(19, 50, 100000) # 800Hz 25% dutycycle
         else:
             print "high"
             gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), servo_camera_back)
+            val_servo = servo_camera_back
             #gpio.hardware_PWM(19, 50, 900000) # 800Hz 25% dutycycle
 
         rotated_servo = not rotated_servo
@@ -493,6 +511,9 @@ class choice_strategy_state:
                 app_state.push_state(qr_state(self.img_hd, self.img_crop))
             elif(contains(BUTTON_2D_FIGUR, x,y)):
                 app_state.push_state(transform_correction_image_state(self.img_hd, self.img_crop, self.mx, self.my))
+
+        elif(event == cv2.EVENT_RBUTTONDOWN):
+            app_state.push_state(crop_image_state(self.img_hd))
 
     def exit(self):
         cv2.setMouseCallback(WINDOW_NAME_HD_PIC, lambda *args : None)
