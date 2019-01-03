@@ -5,6 +5,7 @@ import inputs
 from inputs import get_gamepad
 import time
 from Tkinter import *
+import tkMessageBox
 from threading import Thread
 from utils import sign
 from arm.state_manager import *
@@ -84,22 +85,11 @@ def keydown(e):
         arm.set_tyro_manager_state('tendre')
 
     if e.char == 'c':
-        global detendre_mode
-        detendre_mode = not detendre_mode
+        arm.set_tyro_manager_state('detendre-manuel')
 
-        if detendre_mode:
-            arm.set_tyro_manager_state('detendre-manuel')
-        else:
-            arm.set_tyro_manager_state('stop')
 
     if e.char == 'v':
-        global tendre_mode
-        tendre_mode = not tendre_mode
-
-        if tendre_mode:
-            arm.set_tyro_manager_state('tendre-manuel')
-        else:
-            arm.set_tyro_manager_state('stop')
+        arm.set_tyro_manager_state('tendre-manuel')
 
 
 def write_pwm(pins, value):
@@ -125,7 +115,8 @@ def handle_apporter_tyro():
 
 
 def handle_lacher():
-    sm.set_state(ArmReleaseState())
+    if tkMessageBox.askokcancel('Tyrolienne', 'Vraiment relacher?'):
+        sm.set_state(ArmReleaseState())
 
 
 def handle_stop():
@@ -146,6 +137,10 @@ def handle_shafter():
     sm.set_state(ArmShafterState())
 
 
+def handle_avant():
+    sm.set_state(ArmForwardState())
+
+
 def init_ui(master):
 
     # w = Canvas(master, width=500, height=500)
@@ -160,6 +155,7 @@ def init_ui(master):
     Button(master, text="Lacher", command=handle_lacher).grid(row=2, column=2)
     Button(master, text="Home", command=handle_home).grid(row=2, column=3)
     Button(master, text="SHAFTER", command=handle_shafter).grid(row=2, column=4)
+    Button(master, text="EN AVANT", command=handle_avant).grid(row=2, column=5)
 
     Label(master, text="CROCHETS", bg="BLACK", fg="white").grid(row=3, column=0)
     for i in range(4):

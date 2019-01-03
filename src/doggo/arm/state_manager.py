@@ -285,6 +285,21 @@ class ArmShafterState(State):
         state_manager.set_state(ArmManuelState([75, 390, 0]))
 
 
+class ArmForwardState(State):
+    def update(self, state_manager):
+        state_manager.arm.write_single_goal(4, 510, speed=250)
+        state_manager.wait_stopped()
+
+        state_manager.arm.write_single_goal(1, 11, speed=250)
+        state_manager.wait_stopped()
+
+        state_manager.arm.write_single_goal(4, 790, speed=250)
+        state_manager.wait_stopped()
+
+        state_manager.arm.disable_all()
+
+        state_manager.stop()
+
 class TestState(State):
     def __init__(self):
         State.__init__(self)
