@@ -19,3 +19,8 @@ elif sys.argv[1] == 'rpyc':
     import doggo.arm.arm_service
 
     doggo.arm.arm_service.main()
+
+elif sys.argv[1] == 'killswitch':
+    import utils.killswitch
+
+    utils.killswitch.main()
