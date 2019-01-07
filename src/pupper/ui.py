@@ -15,7 +15,8 @@ val_servo= 500
 
 WINDOW_NAME_HD_PIC = "hd picture"
 
-PIXEL_BY_INCHE = 80.0
+#PIXEL_BY_INCHE = 80.0
+PIXEL_BY_INCHE = 3280/17
 
 SIZE_BUTTON = 40
 
@@ -106,12 +107,10 @@ def keydown(e):
     if e.char == 'k':
 
         if rotated_servo:
-            print "low"
             gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), servo_camera_front)
             val_servo = servo_camera_front
             #gpio.hardware_PWM(19, 50, 100000) # 800Hz 25% dutycycle
         else:
-            print "high"
             gpio.set_servo_pulsewidth(config.get_param('servo_camera_channel'), servo_camera_back)
             val_servo = servo_camera_back
             #gpio.hardware_PWM(19, 50, 900000) # 800Hz 25% dutycycle
@@ -130,7 +129,7 @@ def write_pwm(pins, value):
         if pin not in states or states[pin] != value:
             states[pin] = value
 
-            print ('write', pin, value)
+            #print ('write', pin, value)
             gpio.set_PWM_dutycycle(pin, value)
 
 def keyup(e):
@@ -312,7 +311,26 @@ class gpioloop(Thread):
 
     def run(self):
         while running:
-            if 'w' in keys or 'forward' in pad_keys:
+
+            if 'w' in keys and 'd' in keys:
+                self.motor_left_target_speed = forward_mov_speed
+                self.motor_right_target_speed = forward_mov_speed/2
+
+            elif 'w' in keys and 'a' in keys:
+                self.motor_left_target_speed = forward_mov_speed/2
+                self.motor_right_target_speed = forward_mov_speed
+
+
+            elif 's' in keys and 'd' in keys:
+                self.motor_left_target_speed = -backwards_mov_speed
+                self.motor_right_target_speed = -backwards_mov_speed/2
+
+            elif 's' in keys and 'a' in keys:
+                self.motor_left_target_speed = -backwards_mov_speed/2
+                self.motor_right_target_speed = -backwards_mov_speed
+
+
+            elif 'w' in keys or 'forward' in pad_keys:
                 self.motor_left_target_speed = forward_mov_speed
                 self.motor_right_target_speed = forward_mov_speed
 
@@ -559,7 +577,7 @@ class transform_correction_image_state:
     def init(self):
 
         self.img_show = self.img_crop
-        cv2.putText(self.img_show, "Click on corner!", (300,150), FONT, 4, (0,0,0),5)
+        cv2.putText(self.img_crop, "Click on corner!", (300,150), FONT, 4, (0,0,0),5)
 
         #Should save the picture for after analyse
         cv2.setMouseCallback(WINDOW_NAME_HD_PIC, self.on_click)
@@ -570,18 +588,23 @@ class transform_correction_image_state:
         if(event == cv2.EVENT_LBUTTONDOWN):
             print (x, y)
             self.list_position.append((x, y))
-            if len(self.list_position) == 3:
+            if len(self.list_position) == 4:
 
                 dx = self.list_position[1][0] - self.list_position[0][0]
                 dy = self.list_position[1][1] - self.list_position[0][1]
 
-                self.list_position.append((self.list_position[-1][0] - dx, self.list_position[-1][1] - dy))
+                #self.list_position.append((self.list_position[-1][0] - dx, self.list_position[-1][1] - dy))
 
                 self.list_position = [(self.mx + x / 3.0, self.my + y / 3.0) for (x, y) in self.list_position]
 
-                target_position = [(8 * PIXEL_BY_INCHE, 2464 - PIXEL_BY_INCHE), (8 * PIXEL_BY_INCHE, 2464), 
-                        (10 * PIXEL_BY_INCHE, 2464), (10 * PIXEL_BY_INCHE, 2464 - PIXEL_BY_INCHE)]
 
+                #target_position = [(4 * PIXEL_BY_INCHE, 2464 - PIXEL_BY_INCHE/2), (4 * PIXEL_BY_INCHE, 2464), 
+                        #(5 * PIXEL_BY_INCHE, 2464), (5 * PIXEL_BY_INCHE, 2464 - PIXEL_BY_INCHE/2)]
+
+                #target_position = [(2.5 * PIXEL_BY_INCHE, 2464 - 1.25 * PIXEL_BY_INCHE), (2.5 * PIXEL_BY_INCHE, 2464), 
+                        #(5 * PIXEL_BY_INCHE, 2464), (5 * PIXEL_BY_INCHE, 2464 - 1.25 * PIXEL_BY_INCHE )]
+
+                target_position = [(0,0), (0, 2464),(3280, 2464), (3280,0)]
 
                 h = cv2.getPerspectiveTransform(np.array([self.list_position], dtype="float32"), np.array([target_position], dtype="float32"))
                 self.img_warp = cv2.warpPerspective(self.full_img_hd, h, (3280, 2464))
@@ -591,6 +614,10 @@ class transform_correction_image_state:
 
         elif(event == cv2.EVENT_RBUTTONDOWN):
             app_state.push_state(crop_image_state(self.full_img_hd))
+
+
+        self.img_show = self.img_crop.copy()
+        cv2.putText(self.img_show, str(len(self.list_position)), (100,100), FONT, 4, (255,0,0),5)
 
 
     def exit(self):
@@ -621,12 +648,8 @@ class deuxD_figur_state:
             print(self.list_position)
 
             if(len(self.list_position) >= 2):
-                hori_dist = float(abs(self.list_position[1][0] - self.list_position[0][0]))
-                vert_dist = float(abs(self.list_position[1][1] - self.list_position[0][1]))
-
-                #Divide distance by 2 because it's work like that
-                vert_dist = vert_dist/2
-                hori_dist = hori_dist/2
+                hori_dist = float(abs(self.list_position[1][0] - self.list_position[0][0])/0.82)
+                vert_dist = float(abs(self.list_position[1][1] - self.list_position[0][1])/0.75)
 
                 print("Inches dist| vert: " + str(vert_dist / PIXEL_BY_INCHE) + "  hori: " + str(hori_dist/ PIXEL_BY_INCHE))
                     
