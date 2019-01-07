@@ -477,7 +477,7 @@ class qr_state:
             print x,y
 
         elif(event == cv2.EVENT_RBUTTONDOWN):
-            app_state.push_state(crop_image_state(self.img_hd))
+            app_state.push_state(choice_strategy_state(self.img_hd))
 
 
     def exit(self):
