@@ -58,7 +58,7 @@ def set_grip(state):
     else:
         gpio.set_servo_pulsewidth(22, 1200)
 
-    master.after(500, lambda: gpio.set_servo_pulsewidth(22, 0))
+    # master.after(500, lambda: gpio.set_servo_pulsewidth(22, 0))
 
 
 def keydown(e):
@@ -148,6 +148,11 @@ def handle_shafter():
 
 def handle_avant():
     sm.set_state(ArmForwardState())
+
+
+def handle_pente():
+    sm.set_state(ArmPenteState())
+
 
 def init_ui(master):
 
@@ -259,6 +264,12 @@ def init_ui(master):
     labels['temp_dyn_8'] = temp_dyn_8
 
     Button(master, width=10, text="RESET TORQUE", command=handle_reset_torque).grid(row=12, column=0)
+    Button(master, width=10, text="PENTE", command=handle_pente).grid(row=13, column=0)
+
+    # slow_speed_scale = Scale(master, from_=0, to=255)
+    # slow_speed_scale.bind("<ButtonRelease-1>", self.slow_speed_scale)
+
+
 
     master.bind("<KeyPress>", keydown)
     master.bind("<KeyRelease>", keyup)
