@@ -1,5 +1,6 @@
 import socket
 from contextlib import closing
+import os
 
 
 def host_ready(host, port=22):
@@ -34,3 +35,10 @@ def clamp(value, lower, upper):
         return upper
 
     return value
+
+
+
+def spawn_camera(ip):
+    stream_cmd = "mplayer -fps 200 -demuxer h264es ffmpeg://tcp://%s:9999 > /dev/null &"
+
+    os.system(stream_cmd % ip)
