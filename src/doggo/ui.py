@@ -158,6 +158,8 @@ def init_ui(master):
 
     Label(master, text="MOUVEMENTS", bg="BLACK", fg="white").grid(row=1, column=0)
 
+    forward_mov_speed = Scale(master, from_=100, to=200).grid(row= 6, column=5)
+
     Button(master, text="STOP", command=handle_stop).grid(row=2, column=0)
     Button(master, text="Apporter a tyrolienne", command=handle_apporter_tyro).grid(row=2, column=1)
     Button(master, text="Lacher", command=handle_lacher).grid(row=2, column=2)
@@ -262,6 +264,7 @@ def init_ui(master):
 
     master.bind("<KeyPress>", keydown)
     master.bind("<KeyRelease>", keyup)
+
 
     return labels
 

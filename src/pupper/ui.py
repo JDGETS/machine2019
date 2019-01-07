@@ -172,6 +172,7 @@ def main():
     master.geometry('500x500')
 
     Button(master, text="START VISION", command=start_vision).grid(row=2, column=0)
+    forward_mov_speed = Scale(master, from_=100, to=200).grid(row= 6, column=0)
 
     master.bind("<KeyPress>", keydown)
     master.bind("<KeyRelease>", keyup)
