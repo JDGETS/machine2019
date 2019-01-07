@@ -18,7 +18,7 @@ WINDOW_NAME_HD_PIC = "hd picture"
 #PIXEL_BY_INCHE = 80.0
 PIXEL_BY_INCHE = 3280/17
 
-SIZE_BUTTON = 40
+SIZE_BUTTON = 120
 
 BUTTON_QR = (250,500,SIZE_BUTTON,SIZE_BUTTON)
 BUTTON_2D_FIGUR = (250,125,SIZE_BUTTON,SIZE_BUTTON)
@@ -174,8 +174,6 @@ def main():
     master.geometry('500x500')
 
     Button(master, text="START VISION", command=start_vision).grid(row=2, column=0)
-    Button(master, text="START QR", command=start_qr).grid(row=3, column=0)
-    forward_mov_speed = Scale(master, from_=100, to=200).grid(row= 6, column=0)
 
     master.bind("<KeyPress>", keydown)
     master.bind("<KeyRelease>", keyup)
@@ -450,9 +448,6 @@ class choice_strategy_state:
             elif(contains(BUTTON_QR, x,y)):
                 app_state.push_state(crop_image_state(self.img_hd))
 
-        elif(event == cv2.EVENT_RBUTTONDOWN):
-            app_state.push_state(crop_image_state(self.img_hd))
-
     def exit(self):
         cv2.setMouseCallback(WINDOW_NAME_HD_PIC, lambda *args : None)
 
@@ -530,7 +525,7 @@ class transform_correction_image_state:
                 app_state.push_state(deuxD_figur_state(self.full_img_hd, self.img_warp))
 
         elif(event == cv2.EVENT_RBUTTONDOWN):
-            app_state.push_state(crop_image_state(self.full_img_hd))
+            app_state.push_state(choice_strategy_state(self.full_img_hd))
 
 
         self.img_show = self.full_img_hd.copy()
@@ -574,7 +569,7 @@ class deuxD_figur_state:
 
 
         elif(event == cv2.EVENT_RBUTTONDOWN):
-            app_state.push_state(crop_image_state(self.img_hd))
+            app_state.push_state(choice_strategy_state(self.img_hd))
 
 
 
