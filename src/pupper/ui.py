@@ -20,8 +20,8 @@ PIXEL_BY_INCHE = 3280/17
 
 SIZE_BUTTON = 40
 
-BUTTON_QR = (25,75,SIZE_BUTTON,SIZE_BUTTON)
-BUTTON_2D_FIGUR = (25,125,SIZE_BUTTON,SIZE_BUTTON)
+BUTTON_QR = (250,500,SIZE_BUTTON,SIZE_BUTTON)
+BUTTON_2D_FIGUR = (250,125,SIZE_BUTTON,SIZE_BUTTON)
 
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -149,6 +149,9 @@ def start_vision():
     analyse_picture(config.get_param('matrix_calibration_camera'), config.get_param('coefficient_distortion'), img_hd) 
     pass
 
+def start_qr():
+    app_state.push_state(crop_image_state(app_state.state.img_hd))
+
 
 def start_stream():
     if not os.getenv('NO_CAMERA'):
@@ -171,6 +174,7 @@ def main():
     master.geometry('500x500')
 
     Button(master, text="START VISION", command=start_vision).grid(row=2, column=0)
+    Button(master, text="START QR", command=start_qr).grid(row=3, column=0)
     forward_mov_speed = Scale(master, from_=100, to=200).grid(row= 6, column=0)
 
     master.bind("<KeyPress>", keydown)
@@ -208,88 +212,6 @@ class gamepadloop(Thread):
                 events = get_gamepad()
             except inputs.UnpluggedError:
                 break
-
-            # #print("Pas de manette connectee")
-            # for event in events:
-            #
-            #     # Controle d'evenements et actions avec les boutons
-            #     if event.ev_type == "Key":
-            #
-            #         # Bouton A : rotation camera
-            #         if event.code == 'BTN_SOUTH' and event.state == 1:
-            #             global rotated_servo
-            #             rotated_servo = not rotated_servo
-            #             servo_180(rotated_servo)
-            #             print "hello"
-            #
-            #         elif event.code == "BTN_TR":
-            #             global luminosity
-            #             luminosity += luminosity_step
-            #             write_pwm(config.get_param('light_channel'), luminosity)
-            #
-            #         elif event.code == "BTN_TL":
-            #             global luminosity
-            #             luminosity -= luminosity_step
-            #             write_pwm(config.get_param('light_channel'), luminosity)
-            #
-            #     # Controle du mouvement avec joysticks et trigger
-            #     if event.ev_type == "Absolute":
-            #
-            #         # Si le right trigger est enfonce : controle du robot
-            #         if event.code == "ABS_RZ" and event.state == 255:
-            #             self.right_trigger = True
-            #
-            #         # Si le right trigger est relache
-            #         elif event.code == "ABS_RZ" and event.state < 200:
-            #             self.right_trigger = False
-            #             if 'forward' in pad_keys:
-            #                 del pad_keys['forward']
-            #             if 'backward' in pad_keys:
-            #                 del pad_keys['backward']
-            #             if 'left' in pad_keys:
-            #                 del pad_keys['left']
-            #             if 'right' in pad_keys:
-            #                 del pad_keys['right']
-            #
-            #         # left joystick Y
-            #         elif event.code == "ABS_Y":
-            #             if event.state > JOYSTICK_IGNORE_THRESHOLD and self.right_trigger:
-            #                 if 'forward' in pad_keys:
-            #                     del pad_keys['forward']
-            #
-            #                 pad_keys['backward'] = 1
-            #
-            #             elif event.state < -JOYSTICK_IGNORE_THRESHOLD and self.right_trigger:
-            #                 if 'backward' in pad_keys:
-            #                     del pad_keys['backward']
-            #
-            #                 pad_keys['forward'] = 1
-            #
-            #             else:
-            #                 if 'forward' in pad_keys:
-            #                     del pad_keys['forward']
-            #                 if 'backward' in pad_keys:
-            #                     del pad_keys['backward']
-            #
-            #         # right joystick X
-            #         elif event.code == "ABS_RX":
-            #             if event.state > JOYSTICK_IGNORE_THRESHOLD and self.right_trigger:
-            #                 if 'left' in pad_keys:
-            #                     del pad_keys['left']
-            #
-            #                 pad_keys['right'] = 1
-            #
-            #             elif event.state < -JOYSTICK_IGNORE_THRESHOLD and self.right_trigger:
-            #                 if 'right' in pad_keys:
-            #                     del pad_keys['right']
-            #
-            #                 pad_keys['left'] = 1
-            #
-            #             else:
-            #                 if 'left' in pad_keys:
-            #                     del pad_keys['left']
-            #                 if 'right' in pad_keys:
-            #                     del pad_keys['right']
 
 
 class gpioloop(Thread):
@@ -449,13 +371,12 @@ class take_hd_image_state:
 
         self.img_show = self.img_hd
 
-        app_state.push_state(crop_image_state(self.img_hd))
+        app_state.push_state(choice_strategy_state(self.img_hd))
 
 
     def exit(self):
         #this can be remove if needed
         i = 2
-        #self.cap.release()
 
 
 
@@ -469,9 +390,10 @@ class crop_image_state:
 
     def init(self):
         
-        self.img_show = self.img_hd.copy()
-        cv2.putText(self.img_show, "CROP", (200,200), FONT, 4, (0,0,0),5)
+        self.img_show = self.img_hd
+        cv2.putText(self.img_show,"CROP", (200,200), FONT, 4, (0,0,0),5)
 
+        time.sleep(1)
         #Should save the picture for after analyse
         cv2.setMouseCallback(WINDOW_NAME_HD_PIC, self.on_click)
 
@@ -496,24 +418,21 @@ class crop_image_state:
 
             self.img_crop = cv2.resize(self.img_crop, (w * 3, h * 3))
 
-            app_state.push_state(choice_strategy_state(self.img_hd, self.img_crop, self.mx, self.my))
+            app_state.push_state(qr_state(self.img_hd, self.img_crop))
 
     def exit(self):
         cv2.setMouseCallback(WINDOW_NAME_HD_PIC, lambda *args : None)
 
 
 class choice_strategy_state:
-    def __init__(self, hd_image, crop_image, mx, my):
+    def __init__(self, hd_image):
         self.mode = "choice_strategy"
         print("init choice strategy")
         self.img_hd = hd_image
-        self.img_crop = crop_image
-        self.mx = mx
-        self.my = my
         pass
 
     def init(self):
-        img_tmp = self.img_crop.copy()
+        img_tmp = self.img_hd
         print img_tmp.shape[:2]
         img_tmp = draw_rect_text(BUTTON_QR,img_tmp,0,255,0,"qr");
         img_tmp = draw_rect_text(BUTTON_2D_FIGUR,img_tmp,255,0,0,"dist");
@@ -526,10 +445,10 @@ class choice_strategy_state:
 
     def on_click(self, event, x, y, flags, nb_click):
         if(event == cv2.EVENT_LBUTTONDOWN):
-            if(contains(BUTTON_QR, x,y)):
-                app_state.push_state(qr_state(self.img_hd, self.img_crop))
-            elif(contains(BUTTON_2D_FIGUR, x,y)):
-                app_state.push_state(transform_correction_image_state(self.img_hd, self.img_crop, self.mx, self.my))
+            if(contains(BUTTON_2D_FIGUR, x,y)):
+                app_state.push_state(transform_correction_image_state(self.img_hd))
+            elif(contains(BUTTON_QR, x,y)):
+                app_state.push_state(crop_image_state(self.img_hd))
 
         elif(event == cv2.EVENT_RBUTTONDOWN):
             app_state.push_state(crop_image_state(self.img_hd))
@@ -565,20 +484,17 @@ class qr_state:
         cv2.setMouseCallback(WINDOW_NAME_HD_PIC, lambda *args : None)
 
 class transform_correction_image_state:
-    def __init__(self, full_picture, crop_picture, mx, my):
+    def __init__(self, full_picture):
         self.mode = "transform_correction_image"
         print("init transform correction")
         self.list_position = []
         self.full_img_hd = full_picture
-        self.img_crop = crop_picture
-        self.mx = mx
-        self.my = my
         pass
 
     def init(self):
 
-        self.img_show = self.img_crop
-        cv2.putText(self.img_crop, "Click on corner!", (300,150), FONT, 4, (0,0,0),5)
+        self.img_show = self.full_img_hd
+        cv2.putText(self.full_img_hd, "Click on corner!", (300,150), FONT, 4, (0,0,0),5)
 
         #Should save the picture for after analyse
         cv2.setMouseCallback(WINDOW_NAME_HD_PIC, self.on_click)
@@ -596,7 +512,7 @@ class transform_correction_image_state:
 
                 #self.list_position.append((self.list_position[-1][0] - dx, self.list_position[-1][1] - dy))
 
-                self.list_position = [(self.mx + x / 3.0, self.my + y / 3.0) for (x, y) in self.list_position]
+                #self.list_position = [(self.mx + x / 3.0, self.my + y / 3.0) for (x, y) in self.list_position]
 
 
                 #target_position = [(4 * PIXEL_BY_INCHE, 2464 - PIXEL_BY_INCHE/2), (4 * PIXEL_BY_INCHE, 2464), 
@@ -617,7 +533,7 @@ class transform_correction_image_state:
             app_state.push_state(crop_image_state(self.full_img_hd))
 
 
-        self.img_show = self.img_crop.copy()
+        self.img_show = self.full_img_hd.copy()
         cv2.putText(self.img_show, str(len(self.list_position)), (100,100), FONT, 4, (255,0,0),5)
 
 
