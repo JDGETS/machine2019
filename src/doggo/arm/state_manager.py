@@ -257,8 +257,6 @@ class PickupCrochetState(State):
         state_manager.wait_stopped()
 
         state_manager.gpio.set_servo_pulsewidth(config.doggo_servo_arm_grip_channel, 1200)
-        time.sleep(0.5)
-        state_manager.gpio.set_servo_pulsewidth(config.doggo_servo_arm_grip_channel, 0)
 
         state_manager.arm.write_goal(*before)
         state_manager.wait_stopped()
