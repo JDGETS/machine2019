@@ -9,3 +9,8 @@
 ```python main.py pupperred```
 
 ```python main.py pupperblack```
+
+## Documents
+- [Rapport de mi-étape](rapport_mi-etape.pdf)
+- [Présentation](presentation.pdf)
+
