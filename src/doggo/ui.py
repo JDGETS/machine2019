@@ -7,8 +7,10 @@ import time
 from Tkinter import *
 import tkMessageBox
 from threading import Thread
-from utils import sign
+from utils import sign, spawn_camera
 from arm.state_manager import *
+import os
+
 
 arm = None
 gpio = None
@@ -58,7 +60,7 @@ def set_grip(state):
     else:
         gpio.set_servo_pulsewidth(22, 1200)
 
-    master.after(500, lambda: gpio.set_servo_pulsewidth(22, 0))
+    # master.after(500, lambda: gpio.set_servo_pulsewidth(22, 0))
 
 
 def keydown(e):
@@ -149,6 +151,17 @@ def handle_shafter():
 def handle_avant():
     sm.set_state(ArmForwardState())
 
+
+def handle_pente():
+    sm.set_state(ArmPenteState())
+
+
+def handle_restart_cam():
+    os.system("killall -s 9 mplayer &")
+
+    spawn_camera(config.doggo_overview_ip)
+    spawn_camera(config.doggo_arm_ip)
+
 def init_ui(master):
 
     # w = Canvas(master, width=500, height=500)
@@ -166,6 +179,7 @@ def init_ui(master):
     Button(master, text="Home", command=handle_home).grid(row=2, column=3)
     Button(master, text="SHAFTER", command=handle_shafter).grid(row=2, column=4)
     Button(master, text="EN AVANT", command=handle_avant).grid(row=2, column=5)
+    Button(master, text="RESTART CAM", command=handle_restart_cam).grid(row=2, column=6)
 
     Label(master, text="CROCHETS", bg="BLACK", fg="white").grid(row=3, column=0)
     for i in range(4):
@@ -261,6 +275,12 @@ def init_ui(master):
     labels['temp_dyn_8'] = temp_dyn_8
 
     Button(master, width=10, text="RESET TORQUE", command=handle_reset_torque).grid(row=12, column=0)
+    Button(master, width=10, text="PENTE", command=handle_pente).grid(row=13, column=0)
+
+    # slow_speed_scale = Scale(master, from_=0, to=255)
+    # slow_speed_scale.bind("<ButtonRelease-1>", self.slow_speed_scale)
+
+
 
     master.bind("<KeyPress>", keydown)
     master.bind("<KeyRelease>", keyup)

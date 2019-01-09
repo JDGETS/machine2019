@@ -185,17 +185,12 @@ class ArmHomeState(State):
 class ArmPickupState(State):
     def update(self, state_manager):
         # simba
-        state_manager.arm.write_single_goal(2, 229, speed=100)
+        print 'simba1'
+        state_manager.arm.write_goal_without_base(225, 483, 191, speed=[100, 50, 100])
         state_manager.wait_stopped()
-
-        state_manager.arm.write_single_goal(4, 480, speed=100)
-        state_manager.arm.write_single_goal(5, 191, speed=100)
-        state_manager.wait_stopped()
-
-        # state_manager.arm.write_goal_without_base(225, 483, 191, speed=100)
-        # state_manager.wait_stopped()
 
         # rotate base
+        print 'base'
         state_manager.arm.write_single_goal(1, 616, speed=250)
         state_manager.wait_stopped()
 
@@ -262,8 +257,6 @@ class PickupCrochetState(State):
         state_manager.wait_stopped()
 
         state_manager.gpio.set_servo_pulsewidth(config.doggo_servo_arm_grip_channel, 1200)
-        time.sleep(0.5)
-        state_manager.gpio.set_servo_pulsewidth(config.doggo_servo_arm_grip_channel, 0)
 
         state_manager.arm.write_goal(*before)
         state_manager.wait_stopped()
@@ -327,3 +320,8 @@ class ArmCasseState(State):
 
         state_manager.arm.write_goal(291, 300, 765, 579, speed=[80, 75, 120, 75])
         state_manager.wait_stopped()
+
+
+class ArmPenteState(State):
+    def update(self, state_manager):
+        state_manager.arm.write_goal(0, 835, 282, 528)
