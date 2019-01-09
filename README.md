@@ -2,4 +2,10 @@
 
 ## Doggo
 
-`python main.py doggo`
+```python main.py doggo```
+
+## Pupper
+
+```python main.py pupperred```
+
+```python main.py pupperblack```
