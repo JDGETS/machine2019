@@ -10,7 +10,8 @@
 
 ```python main.py pupperblack```
 
-## Documents
+## Artéfacts
 - [Rapport de mi-étape](rapport_mi-etape.pdf)
 - [Présentation](presentation.pdf)
+- [Video machine](https://www.youtube.com/watch?v=33MmeCM0EXI&feature=youtu.be)
 
