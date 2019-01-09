@@ -1,6 +1,6 @@
 # Machine de la délégation des Jeux de Génie 2019 de l'ÉTS
 
-![robots.jpg][https://github.com/JDGETS/machine2019/raw/master/photos/robots.jpg]
+![robots.jpg](https://github.com/JDGETS/machine2019/raw/master/photos/robots.jpg)
 
 
 ## Doggo
